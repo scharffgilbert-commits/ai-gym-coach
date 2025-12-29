@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfileSync } from '@/hooks/useProfileSync';
 import { OnboardingStep, Injury, BodyRegion } from '@/types/fitness';
+import { toast } from 'sonner';
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -29,8 +32,11 @@ interface OnboardingFlowProps {
 }
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
+  const { user: authUser } = useAuth();
   const { onboardingStep, setOnboardingStep, setHealthProfile, setFitnessGoals, setUser } = useApp();
+  const { saveHealthProfile, saveFitnessGoals, completeOnboarding } = useProfileSync();
   const [direction, setDirection] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Form state
   const [healthData, setHealthData] = useState({
@@ -70,51 +76,70 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   };
 
-  const handleComplete = () => {
-    // Save all data
-    setHealthProfile({
-      userId: 'temp-user',
-      age: parseInt(healthData.age),
-      gender: healthData.gender,
-      height: parseInt(healthData.height),
-      weight: parseInt(healthData.weight),
-      injuries: injuries.map((area, i) => ({
-        id: `injury-${i}`,
-        area: area as Injury['area'],
-        severity: 'mild',
-        recoveryStatus: 'recovering',
-      })),
-      preconditions: [],
-      gdprConsent: consents.gdpr,
-      healthDataConsent: consents.healthData,
-      imageAnalysisConsent: consents.imageAnalysis,
-    });
+  const handleComplete = async () => {
+    if (!authUser) return;
+    
+    setIsSaving(true);
+    try {
+      const healthProfile = {
+        userId: authUser.id,
+        age: parseInt(healthData.age),
+        gender: healthData.gender,
+        height: parseInt(healthData.height),
+        weight: parseInt(healthData.weight),
+        injuries: injuries.map((area, i) => ({
+          id: `injury-${i}`,
+          area: area as Injury['area'],
+          severity: 'mild' as const,
+          recoveryStatus: 'recovering' as const,
+        })),
+        preconditions: [],
+        gdprConsent: consents.gdpr,
+        healthDataConsent: consents.healthData,
+        imageAnalysisConsent: consents.imageAnalysis,
+      };
 
-    setFitnessGoals({
-      userId: 'temp-user',
-      shortTerm: goals.map((type, i) => ({
-        id: `goal-${i}`,
-        type: type as any,
-        description: type,
-        priority: i + 1,
-      })),
-      midTerm: [],
-      longTerm: [],
-      focusAreas,
-      experienceLevel: experience,
-    });
+      const fitnessGoalsData = {
+        userId: authUser.id,
+        shortTerm: goals.map((type, i) => ({
+          id: `goal-${i}`,
+          type: type as any,
+          description: type,
+          priority: i + 1,
+        })),
+        midTerm: [],
+        longTerm: [],
+        focusAreas,
+        experienceLevel: experience,
+      };
 
-    setUser({
-      id: 'temp-user',
-      email: 'demo@fitai.app',
-      name: 'Demo User',
-      createdAt: new Date(),
-      onboardingComplete: true,
-      subscriptionStatus: 'trial',
-      trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    });
+      // Save to local state
+      setHealthProfile(healthProfile);
+      setFitnessGoals(fitnessGoalsData);
+      
+      // Save to Supabase
+      await saveHealthProfile(healthProfile);
+      await saveFitnessGoals(fitnessGoalsData);
+      await completeOnboarding();
 
-    onComplete();
+      setUser({
+        id: authUser.id,
+        email: authUser.email || '',
+        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+        createdAt: new Date(authUser.created_at),
+        onboardingComplete: true,
+        subscriptionStatus: 'trial',
+        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+
+      toast.success('Profile saved successfully!');
+      onComplete();
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast.error('Failed to save profile. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const injuryOptions = [
@@ -692,9 +717,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 transition={{ delay: 0.6 }}
                 className="mt-8 w-full max-w-sm"
               >
-                <Button variant="hero" size="xl" className="w-full" onClick={handleComplete}>
-                  Start Training
-                  <ChevronRight className="h-5 w-5" />
+                <Button 
+                  variant="hero" 
+                  size="xl" 
+                  className="w-full" 
+                  onClick={handleComplete}
+                  disabled={isSaving}
+                >
+                  {isSaving ? 'Saving...' : 'Start Training'}
+                  {!isSaving && <ChevronRight className="h-5 w-5" />}
                 </Button>
               </motion.div>
             </div>

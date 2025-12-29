@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AppProvider, useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfileSync } from '@/hooks/useProfileSync';
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { AddEquipment } from '@/components/equipment/AddEquipment';
@@ -28,9 +29,9 @@ function AppContent() {
   const navigate = useNavigate();
   const { user: authUser, isLoading: authLoading, signOut } = useAuth();
   const { user, logout, setUser } = useApp();
-  const [currentScreen, setCurrentScreen] = useState<AppScreen>(
-    user?.onboardingComplete ? 'dashboard' : 'onboarding'
-  );
+  const { loadProfileData } = useProfileSync();
+  const [currentScreen, setCurrentScreen] = useState<AppScreen>('onboarding');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -39,20 +40,21 @@ function AppContent() {
     }
   }, [authUser, authLoading, navigate]);
 
-  // Sync auth user to app context
+  // Load profile data and set initial screen
   useEffect(() => {
-    if (authUser && !user) {
-      setUser({
-        id: authUser.id,
-        email: authUser.email || '',
-        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
-        createdAt: new Date(authUser.created_at),
-        onboardingComplete: false,
-        subscriptionStatus: 'trial',
-        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    if (authUser && !isInitialized) {
+      loadProfileData().then(() => {
+        setIsInitialized(true);
       });
     }
-  }, [authUser, user, setUser]);
+  }, [authUser, isInitialized, loadProfileData]);
+
+  // Set screen based on user state
+  useEffect(() => {
+    if (isInitialized && user) {
+      setCurrentScreen(user.onboardingComplete ? 'dashboard' : 'onboarding');
+    }
+  }, [isInitialized, user]);
 
   const handleOnboardingComplete = () => {
     setCurrentScreen('dashboard');
@@ -64,7 +66,7 @@ function AppContent() {
     navigate('/auth', { replace: true });
   };
 
-  if (authLoading) {
+  if (authLoading || !isInitialized) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
