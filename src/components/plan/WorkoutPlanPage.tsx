@@ -1,51 +1,57 @@
 import { motion } from 'framer-motion';
-import { Sparkles, Play, Clock, Dumbbell, ChevronRight } from 'lucide-react';
+import { Sparkles, Play, Clock, Dumbbell, ChevronRight, Loader2, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
-import { PlannedExercise } from '@/types/fitness';
+import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
+import { useMemo } from 'react';
 
 interface WorkoutPlanPageProps {
   onStartWorkout: () => void;
 }
 
 export function WorkoutPlanPage({ onStartWorkout }: WorkoutPlanPageProps) {
-  const { gyms, fitnessGoals } = useApp();
-
-  const hasEquipment = gyms.length > 0 && gyms[0].machines.length > 0;
-
-  // Mock AI-generated plan based on equipment
-  const weeklyPlan: Record<string, PlannedExercise[]> = {
-    Monday: [
-      { id: '1', machineId: 'm1', machineName: 'Chest Press Machine', order: 1, sets: 4, targetReps: 12, targetWeight: 50, restSeconds: 90, dayOfWeek: 1 },
-      { id: '2', machineId: 'm2', machineName: 'Incline Dumbbell Press', order: 2, sets: 3, targetReps: 10, targetWeight: 20, restSeconds: 90, dayOfWeek: 1 },
-      { id: '3', machineId: 'm3', machineName: 'Cable Fly', order: 3, sets: 3, targetReps: 15, targetWeight: 15, restSeconds: 60, dayOfWeek: 1 },
-      { id: '4', machineId: 'm4', machineName: 'Tricep Pushdown', order: 4, sets: 3, targetReps: 12, targetWeight: 25, restSeconds: 60, dayOfWeek: 1 },
-    ],
-    Tuesday: [
-      { id: '5', machineId: 'm5', machineName: 'Lat Pulldown', order: 1, sets: 4, targetReps: 12, targetWeight: 55, restSeconds: 90, dayOfWeek: 2 },
-      { id: '6', machineId: 'm6', machineName: 'Seated Row', order: 2, sets: 4, targetReps: 12, targetWeight: 50, restSeconds: 90, dayOfWeek: 2 },
-      { id: '7', machineId: 'm7', machineName: 'Face Pulls', order: 3, sets: 3, targetReps: 15, targetWeight: 20, restSeconds: 60, dayOfWeek: 2 },
-      { id: '8', machineId: 'm8', machineName: 'Bicep Curls', order: 4, sets: 3, targetReps: 12, targetWeight: 12, restSeconds: 60, dayOfWeek: 2 },
-    ],
-    Wednesday: [],
-    Thursday: [
-      { id: '9', machineId: 'm9', machineName: 'Leg Press', order: 1, sets: 4, targetReps: 12, targetWeight: 120, restSeconds: 120, dayOfWeek: 4 },
-      { id: '10', machineId: 'm10', machineName: 'Leg Extension', order: 2, sets: 3, targetReps: 15, targetWeight: 45, restSeconds: 60, dayOfWeek: 4 },
-      { id: '11', machineId: 'm11', machineName: 'Leg Curl', order: 3, sets: 3, targetReps: 15, targetWeight: 40, restSeconds: 60, dayOfWeek: 4 },
-      { id: '12', machineId: 'm12', machineName: 'Calf Raises', order: 4, sets: 4, targetReps: 15, targetWeight: 80, restSeconds: 60, dayOfWeek: 4 },
-    ],
-    Friday: [
-      { id: '13', machineId: 'm13', machineName: 'Shoulder Press', order: 1, sets: 4, targetReps: 10, targetWeight: 35, restSeconds: 90, dayOfWeek: 5 },
-      { id: '14', machineId: 'm14', machineName: 'Lateral Raises', order: 2, sets: 3, targetReps: 15, targetWeight: 10, restSeconds: 60, dayOfWeek: 5 },
-      { id: '15', machineId: 'm15', machineName: 'Rear Delt Fly', order: 3, sets: 3, targetReps: 15, targetWeight: 12, restSeconds: 60, dayOfWeek: 5 },
-    ],
-    Saturday: [],
-    Sunday: [],
-  };
+  const { fitnessGoals, workoutPlans } = useApp();
+  const { generateWorkout, isGenerating, generatedPlan } = useWorkoutGeneration();
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const today = days[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+
+  // Build weekly plan from the most recent AI-generated plan or generated plan
+  const weeklyPlan = useMemo(() => {
+    const plan: Record<string, { machineName: string; sets: number; targetReps: number; targetWeight: number; restSeconds: number; id: string }[]> = {
+      Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: [], Sunday: [],
+    };
+
+    // Use generatedPlan if available, otherwise use workoutPlans
+    if (generatedPlan?.weeklyPlan) {
+      Object.entries(generatedPlan.weeklyPlan).forEach(([day, exercises]) => {
+        plan[day] = (exercises as any[]).map((ex, i) => ({
+          id: `gen-${day}-${i}`,
+          ...ex,
+        }));
+      });
+    } else if (workoutPlans.length > 0) {
+      const latestPlan = workoutPlans.find(p => p.aiGenerated) || workoutPlans[0];
+      latestPlan.exercises.forEach(ex => {
+        const dayName = days[ex.dayOfWeek];
+        if (dayName && plan[dayName]) {
+          plan[dayName].push({
+            id: ex.id,
+            machineName: ex.machineName,
+            sets: ex.sets,
+            targetReps: ex.targetReps,
+            targetWeight: ex.targetWeight,
+            restSeconds: ex.restSeconds,
+          });
+        }
+      });
+    }
+
+    return plan;
+  }, [generatedPlan, workoutPlans]);
+
+  const hasAnyExercises = Object.values(weeklyPlan).some(day => day.length > 0);
 
   return (
     <div className="min-h-screen pb-24 bg-background">
@@ -183,17 +189,65 @@ export function WorkoutPlanPage({ onStartWorkout }: WorkoutPlanPageProps) {
           </div>
         </motion.div>
 
-        {/* Regenerate Plan */}
+        {/* Generate/Regenerate Plan */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
+          className="space-y-3"
         >
-          <Button variant="outline" size="lg" className="w-full">
-            <Sparkles className="h-5 w-5" />
-            Regenerate Plan
+          {!hasAnyExercises && (
+            <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 text-center">
+              <Brain className="h-12 w-12 mx-auto text-primary mb-3" />
+              <h4 className="font-semibold text-foreground mb-2">No Plan Yet</h4>
+              <p className="text-sm text-muted-foreground mb-4">
+                Generate your first AI-powered workout plan based on your goals and equipment.
+              </p>
+            </div>
+          )}
+          <Button 
+            variant={hasAnyExercises ? "outline" : "default"} 
+            size="lg" 
+            className="w-full"
+            onClick={generateWorkout}
+            disabled={isGenerating}
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Generating Plan...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-5 w-5" />
+                {hasAnyExercises ? 'Regenerate Plan' : 'Generate AI Plan'}
+              </>
+            )}
           </Button>
         </motion.div>
+
+        {/* AI Tips */}
+        {generatedPlan?.tips && generatedPlan.tips.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="rounded-2xl bg-card p-4 shadow-card"
+          >
+            <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
+              <Brain className="h-4 w-4 text-primary" />
+              AI Coach Tips
+            </h4>
+            <ul className="space-y-2">
+              {generatedPlan.tips.map((tip, i) => (
+                <li key={i} className="text-sm text-muted-foreground flex gap-2">
+                  <span className="text-primary">•</span>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
       </div>
     </div>
   );
