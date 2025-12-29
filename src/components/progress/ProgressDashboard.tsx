@@ -3,11 +3,11 @@ import { TrendingUp, Flame, Dumbbell, Calendar, ChevronRight, Loader2 } from 'lu
 import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useWorkoutProgress } from '@/hooks/useWorkoutProgress';
 
 export function ProgressDashboard() {
-  const { user } = useApp();
+  const { user } = useAuth();
   const { stats, isLoading } = useWorkoutProgress(user?.id);
 
   if (isLoading) {
