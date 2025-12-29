@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
 import { Machine, MachineCategory, MuscleGroup } from '@/types/fitness';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AddEquipmentProps {
   onBack: () => void;
@@ -63,33 +64,68 @@ export function AddEquipment({ onBack, onComplete }: AddEquipmentProps) {
     { id: 'erector-spinae', label: 'Lower Back' },
   ];
 
-  const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
       setImageUrl(url);
-      simulateAIAnalysis();
+      await analyzeEquipmentWithAI(file);
     }
   };
 
-  const simulateAIAnalysis = () => {
+  const analyzeEquipmentWithAI = async (file: File) => {
     setStep('analyzing');
     setIsAnalyzing(true);
 
-    // Simulate AI detection delay
-    setTimeout(() => {
-      // Mock AI detection result
+    try {
+      // Convert file to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
+      reader.readAsDataURL(file);
+      const imageBase64 = await base64Promise;
+
+      const { data, error } = await supabase.functions.invoke('analyze-equipment', {
+        body: { imageBase64 },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Map the AI response to our machine data format
       setMachineData({
-        name: 'Chest Press Machine',
-        category: 'chest',
-        muscleGroups: ['pectorals', 'deltoids', 'triceps'],
-        manufacturer: 'Life Fitness',
+        name: data.name || 'Unknown Machine',
+        category: (data.category as MachineCategory) || 'functional',
+        muscleGroups: (data.muscleGroups as MuscleGroup[]) || [],
+        manufacturer: data.manufacturer || '',
         aiDetected: true,
         userConfirmed: false,
       });
-      setIsAnalyzing(false);
+
+      toast({
+        title: 'Equipment detected!',
+        description: `AI identified: ${data.name}${data.confidence ? ` (${Math.round(data.confidence * 100)}% confident)` : ''}`,
+      });
+
       setStep('confirm');
-    }, 2500);
+    } catch (error) {
+      console.error('Error analyzing equipment:', error);
+      toast({
+        title: 'Detection failed',
+        description: 'Could not analyze the image. Please add details manually.',
+        variant: 'destructive',
+      });
+      setStep('details');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleConfirm = () => {
