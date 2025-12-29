@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipForward, Check, X, ChevronRight, Timer, Dumbbell } from 'lucide-react';
+import { Play, Pause, SkipForward, Check, X, ChevronRight, Timer, Dumbbell, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { useApp } from '@/contexts/AppContext';
 import { PlannedExercise, CompletedSet } from '@/types/fitness';
+import { useWorkoutProgress } from '@/hooks/useWorkoutProgress';
 
 interface WorkoutSessionProps {
   onComplete: () => void;
@@ -62,7 +63,8 @@ const mockExercises: PlannedExercise[] = [
 type WorkoutPhase = 'exercise' | 'rest' | 'summary';
 
 export function WorkoutSession({ onComplete, onExit }: WorkoutSessionProps) {
-  const { gyms } = useApp();
+  const { gyms, user } = useApp();
+  const { saveWorkoutSession } = useWorkoutProgress(user?.id);
   
   const [exercises] = useState<PlannedExercise[]>(
     gyms[0]?.machines.length > 0
@@ -85,10 +87,11 @@ export function WorkoutSession({ onComplete, onExit }: WorkoutSessionProps) {
   const [phase, setPhase] = useState<WorkoutPhase>('exercise');
   const [restTimeRemaining, setRestTimeRemaining] = useState(0);
   const [isTimerPaused, setIsTimerPaused] = useState(false);
-  const [completedSets, setCompletedSets] = useState<CompletedSet[]>([]);
+  const [completedSets, setCompletedSets] = useState<Record<string, CompletedSet[]>>({});
   const [workoutStartTime] = useState(new Date());
   const [actualReps, setActualReps] = useState(0);
   const [actualWeight, setActualWeight] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
 
   const currentExercise = exercises[currentExerciseIndex];
   const totalExercises = exercises.length;
@@ -126,7 +129,12 @@ export function WorkoutSession({ onComplete, onExit }: WorkoutSessionProps) {
       weight: actualWeight,
       completedAt: new Date(),
     };
-    setCompletedSets([...completedSets, newSet]);
+    
+    const exerciseId = currentExercise.id;
+    setCompletedSets(prev => ({
+      ...prev,
+      [exerciseId]: [...(prev[exerciseId] || []), newSet],
+    }));
 
     if (currentSetNumber >= currentExercise.sets) {
       // Exercise complete
@@ -376,7 +384,9 @@ export function WorkoutSession({ onComplete, onExit }: WorkoutSessionProps) {
               </div>
               <div className="fitness-card text-center">
                 <Dumbbell className="mx-auto h-6 w-6 text-primary" />
-                <p className="mt-2 text-2xl font-bold text-foreground">{completedSets.length}</p>
+                <p className="mt-2 text-2xl font-bold text-foreground">
+                  {Object.values(completedSets).reduce((acc, sets) => acc + sets.length, 0)}
+                </p>
                 <p className="text-sm text-muted-foreground">Total Sets</p>
               </div>
             </div>
@@ -399,9 +409,41 @@ export function WorkoutSession({ onComplete, onExit }: WorkoutSessionProps) {
             </div>
 
             <div className="mt-8 w-full max-w-sm">
-              <Button variant="hero" size="xl" className="w-full" onClick={onComplete}>
-                Finish
-                <ChevronRight className="h-5 w-5" />
+              <Button 
+                variant="hero" 
+                size="xl" 
+                className="w-full" 
+                onClick={async () => {
+                  setIsSaving(true);
+                  const workoutData = {
+                    exercises: exercises.map(ex => ({
+                      machineName: ex.machineName,
+                      machineId: ex.machineId,
+                      sets: (completedSets[ex.id] || []).map(set => ({
+                        setNumber: set.setNumber,
+                        reps: set.reps,
+                        weight: set.weight,
+                      })),
+                    })),
+                    totalDuration: workoutDuration,
+                  };
+                  await saveWorkoutSession(workoutData);
+                  setIsSaving(false);
+                  onComplete();
+                }}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    Finish
+                    <ChevronRight className="h-5 w-5" />
+                  </>
+                )}
               </Button>
             </div>
           </motion.div>

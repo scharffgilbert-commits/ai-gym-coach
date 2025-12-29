@@ -1,42 +1,34 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, Flame, Dumbbell, Calendar, ChevronRight } from 'lucide-react';
+import { TrendingUp, Flame, Dumbbell, Calendar, ChevronRight, Loader2 } from 'lucide-react';
 import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
+import { useWorkoutProgress } from '@/hooks/useWorkoutProgress';
 
 export function ProgressDashboard() {
   const { user } = useApp();
+  const { stats, isLoading } = useWorkoutProgress(user?.id);
 
-  // Mock progress data
-  const stats = {
-    totalWorkouts: 24,
-    currentStreak: 12,
-    longestStreak: 18,
-    totalWeightLifted: 45600,
-    averageDuration: 48,
-    weeklyGoal: 4,
-    weeklyCompleted: 3,
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pb-24 bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  const weeklyData = [
-    { day: 'Mon', value: 85 },
-    { day: 'Tue', value: 100 },
-    { day: 'Wed', value: 75 },
-    { day: 'Thu', value: 0 },
-    { day: 'Fri', value: 0 },
-    { day: 'Sat', value: 0 },
-    { day: 'Sun', value: 0 },
-  ];
-
-  const muscleProgress = [
-    { name: 'Chest', progress: 78, workouts: 8 },
-    { name: 'Back', progress: 65, workouts: 6 },
-    { name: 'Legs', progress: 82, workouts: 9 },
-    { name: 'Shoulders', progress: 55, workouts: 5 },
-    { name: 'Arms', progress: 70, workouts: 7 },
-    { name: 'Core', progress: 45, workouts: 4 },
-  ];
+  const weeklyData = stats.weeklyData;
+  const muscleProgress = stats.muscleProgress.length > 0 
+    ? stats.muscleProgress 
+    : [
+        { name: 'Chest', progress: 0, workouts: 0 },
+        { name: 'Back', progress: 0, workouts: 0 },
+        { name: 'Legs', progress: 0, workouts: 0 },
+        { name: 'Shoulders', progress: 0, workouts: 0 },
+        { name: 'Arms', progress: 0, workouts: 0 },
+        { name: 'Core', progress: 0, workouts: 0 },
+      ];
 
   return (
     <div className="min-h-screen pb-24 bg-background">
@@ -176,30 +168,32 @@ export function ProgressDashboard() {
           transition={{ delay: 0.5 }}
         >
           <h3 className="mb-4 text-lg font-semibold text-foreground">Personal Records</h3>
-          <div className="space-y-3">
-            {[
-              { exercise: 'Chest Press', record: '85kg', date: '2 weeks ago' },
-              { exercise: 'Leg Press', record: '180kg', date: '1 week ago' },
-              { exercise: 'Lat Pulldown', record: '70kg', date: '3 days ago' },
-            ].map((pr, i) => (
-              <motion.div
-                key={pr.exercise}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.55 + i * 0.05 }}
-                className="flex items-center gap-4 rounded-2xl bg-card p-4 shadow-card"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20 text-warning">
-                  🏆
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">{pr.exercise}</p>
-                  <p className="text-sm text-muted-foreground">{pr.date}</p>
-                </div>
-                <span className="text-xl font-bold text-foreground">{pr.record}</span>
-              </motion.div>
-            ))}
-          </div>
+          {stats.personalRecords.length > 0 ? (
+            <div className="space-y-3">
+              {stats.personalRecords.map((pr, i) => (
+                <motion.div
+                  key={pr.exercise}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.55 + i * 0.05 }}
+                  className="flex items-center gap-4 rounded-2xl bg-card p-4 shadow-card"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20 text-warning">
+                    🏆
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">{pr.exercise}</p>
+                    <p className="text-sm text-muted-foreground">{pr.date}</p>
+                  </div>
+                  <span className="text-xl font-bold text-foreground">{pr.record}</span>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-card p-6 shadow-card text-center">
+              <p className="text-muted-foreground">Complete workouts to set personal records!</p>
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
