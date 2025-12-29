@@ -3,3 +3,7 @@ project_id = "pgtgobrydodjwdgufqyk"
 [functions.generate-workout]
 enabled = true
 verify_jwt = false
+
+[functions.analyze-equipment]
+enabled = true
+verify_jwt = false
