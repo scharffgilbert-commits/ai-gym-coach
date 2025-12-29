@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AppProvider, useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { AddEquipment } from '@/components/equipment/AddEquipment';
@@ -10,6 +12,7 @@ import { ProgressDashboard } from '@/components/progress/ProgressDashboard';
 import { ProfilePage } from '@/components/profile/ProfilePage';
 import { WorkoutPlanPage } from '@/components/plan/WorkoutPlanPage';
 import { MobileNav } from '@/components/layout/MobileNav';
+import { Loader2 } from 'lucide-react';
 
 type AppScreen = 
   | 'onboarding'
@@ -22,19 +25,56 @@ type AppScreen =
   | 'profile';
 
 function AppContent() {
-  const { user, logout } = useApp();
+  const navigate = useNavigate();
+  const { user: authUser, isLoading: authLoading, signOut } = useAuth();
+  const { user, logout, setUser } = useApp();
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(
     user?.onboardingComplete ? 'dashboard' : 'onboarding'
   );
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !authUser) {
+      navigate('/auth', { replace: true });
+    }
+  }, [authUser, authLoading, navigate]);
+
+  // Sync auth user to app context
+  useEffect(() => {
+    if (authUser && !user) {
+      setUser({
+        id: authUser.id,
+        email: authUser.email || '',
+        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+        createdAt: new Date(authUser.created_at),
+        onboardingComplete: false,
+        subscriptionStatus: 'trial',
+        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+    }
+  }, [authUser, user, setUser]);
 
   const handleOnboardingComplete = () => {
     setCurrentScreen('dashboard');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     logout();
-    setCurrentScreen('onboarding');
+    navigate('/auth', { replace: true });
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!authUser) {
+    return null;
+  }
 
   const getPathFromScreen = (screen: AppScreen): string => {
     const paths: Record<AppScreen, string> = {

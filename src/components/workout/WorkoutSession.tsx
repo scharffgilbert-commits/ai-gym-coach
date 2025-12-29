@@ -4,6 +4,7 @@ import { Play, Pause, SkipForward, Check, X, ChevronRight, Timer, Dumbbell, Load
 import { Button } from '@/components/ui/button';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { PlannedExercise, CompletedSet } from '@/types/fitness';
 import { useWorkoutProgress } from '@/hooks/useWorkoutProgress';
 
@@ -63,8 +64,9 @@ const mockExercises: PlannedExercise[] = [
 type WorkoutPhase = 'exercise' | 'rest' | 'summary';
 
 export function WorkoutSession({ onComplete, onExit }: WorkoutSessionProps) {
-  const { gyms, user } = useApp();
-  const { saveWorkoutSession } = useWorkoutProgress(user?.id);
+  const { gyms } = useApp();
+  const { user: authUser } = useAuth();
+  const { saveWorkoutSession } = useWorkoutProgress(authUser?.id);
   
   const [exercises] = useState<PlannedExercise[]>(
     gyms[0]?.machines.length > 0
