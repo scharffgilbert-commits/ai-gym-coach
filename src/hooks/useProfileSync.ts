@@ -19,12 +19,32 @@ export function useProfileSync() {
     if (!authUser) return;
 
     try {
-      // Load profile
-      const { data: profile } = await supabase
+      // Load profile - create if doesn't exist
+      let { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', authUser.id)
         .single();
+
+      // If profile doesn't exist, create one
+      if (profileError && profileError.code === 'PGRST116') {
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: authUser.id,
+            name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+            onboarding_complete: false,
+            subscription_status: 'trial',
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+        } else {
+          profile = newProfile;
+        }
+      }
 
       if (profile) {
         setUser({
@@ -40,6 +60,17 @@ export function useProfileSync() {
         if (profile.onboarding_complete) {
           setOnboardingStep('complete');
         }
+      } else {
+        // Fallback: set a basic user even if profile creation failed
+        setUser({
+          id: authUser.id,
+          email: authUser.email || '',
+          name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+          createdAt: new Date(),
+          onboardingComplete: false,
+          subscriptionStatus: 'trial',
+          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        });
       }
 
       // Load health profile
@@ -235,10 +266,8 @@ export function useProfileSync() {
     }
   }, [authUser]);
 
-  // Load data on mount
-  useEffect(() => {
-    loadProfileData();
-  }, [loadProfileData]);
+  // Don't auto-load on mount - let the parent component control when to load
+  // This prevents duplicate loading
 
   return {
     loadProfileData,

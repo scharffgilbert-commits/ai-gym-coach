@@ -42,11 +42,13 @@ function AppContent() {
 
   // Load profile data and set initial screen
   useEffect(() => {
-    if (authUser && !isInitialized) {
-      loadProfileData().then(() => {
+    const initializeProfile = async () => {
+      if (authUser && !isInitialized) {
+        await loadProfileData();
         setIsInitialized(true);
-      });
-    }
+      }
+    };
+    initializeProfile();
   }, [authUser, isInitialized, loadProfileData]);
 
   // Set screen based on user state
