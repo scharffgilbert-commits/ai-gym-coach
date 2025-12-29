@@ -115,7 +115,11 @@ function AppContent() {
         )}
 
         {currentScreen === 'profile' && (
-          <ProfilePage key="profile" onLogout={handleLogout} />
+          <ProfilePage 
+            key="profile" 
+            onLogout={handleLogout} 
+            onResetProfile={() => setCurrentScreen('onboarding')}
+          />
         )}
       </AnimatePresence>
 

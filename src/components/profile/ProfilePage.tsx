@@ -1,17 +1,24 @@
 import { motion } from 'framer-motion';
-import { User, Settings, Bell, Shield, LogOut, ChevronRight, Moon, Sun, Crown } from 'lucide-react';
+import { User, Settings, Bell, Shield, LogOut, ChevronRight, Moon, Sun, Crown, Target, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
 
 interface ProfilePageProps {
   onLogout: () => void;
+  onResetProfile?: () => void;
 }
 
-export function ProfilePage({ onLogout }: ProfilePageProps) {
+export function ProfilePage({ onLogout, onResetProfile }: ProfilePageProps) {
   const { user, healthProfile, fitnessGoals, isDarkMode, toggleDarkMode } = useApp();
 
   const menuItems = [
+    {
+      icon: Target,
+      label: 'Edit Fitness Goals',
+      description: 'Update goals, focus areas & experience',
+      action: onResetProfile,
+    },
     {
       icon: User,
       label: 'Edit Profile',
@@ -152,10 +159,11 @@ export function ProfilePage({ onLogout }: ProfilePageProps) {
           {menuItems.map((item, i) => (
             <button
               key={item.label}
+              onClick={item.action}
               className="flex w-full items-center gap-4 rounded-2xl bg-card p-4 shadow-card transition-all hover:shadow-elevated"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-                <item.icon className="h-6 w-6 text-muted-foreground" />
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${item.action ? 'bg-primary/10' : 'bg-muted'}`}>
+                <item.icon className={`h-6 w-6 ${item.action ? 'text-primary' : 'text-muted-foreground'}`} />
               </div>
               <div className="flex-1 text-left">
                 <p className="font-medium text-foreground">{item.label}</p>
