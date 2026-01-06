@@ -13,6 +13,7 @@ import { PlanSelector } from '@/components/workout/PlanSelector';
 import { ProgressDashboard } from '@/components/progress/ProgressDashboard';
 import { ProfilePage } from '@/components/profile/ProfilePage';
 import { WorkoutPlanPage } from '@/components/plan/WorkoutPlanPage';
+import { PlanEditor } from '@/components/plan/PlanEditor';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Loader2 } from 'lucide-react';
 import { PlannedExercise } from '@/types/fitness';
@@ -23,6 +24,7 @@ type AppScreen =
   | 'equipment'
   | 'add-equipment'
   | 'plan'
+  | 'edit-plan'
   | 'select-workout'
   | 'workout'
   | 'progress'
@@ -35,6 +37,7 @@ function AppContent() {
   const { loadProfileData } = useProfileSync();
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('onboarding');
   const [selectedExercises, setSelectedExercises] = useState<PlannedExercise[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Redirect to auth if not logged in
@@ -91,12 +94,18 @@ function AppContent() {
       equipment: '/equipment',
       'add-equipment': '/equipment/add',
       plan: '/plan',
+      'edit-plan': '/plan/edit',
       'select-workout': '/select-workout',
       workout: '/workout',
       progress: '/progress',
       profile: '/profile',
     };
     return paths[screen];
+  };
+
+  const handleEditPlan = (planId: string) => {
+    setSelectedPlanId(planId);
+    setCurrentScreen('edit-plan');
   };
 
   const handleNavigate = (path: string) => {
@@ -111,7 +120,7 @@ function AppContent() {
     if (screen) setCurrentScreen(screen);
   };
 
-  const showNav = !['onboarding', 'workout', 'add-equipment', 'select-workout'].includes(currentScreen);
+  const showNav = !['onboarding', 'workout', 'add-equipment', 'select-workout', 'edit-plan'].includes(currentScreen);
 
   const handleSelectPlan = (exercises: PlannedExercise[]) => {
     setSelectedExercises(exercises);
@@ -153,6 +162,16 @@ function AppContent() {
           <WorkoutPlanPage
             key="plan"
             onStartWorkout={() => setCurrentScreen('select-workout')}
+            onEditPlan={handleEditPlan}
+          />
+        )}
+
+        {currentScreen === 'edit-plan' && selectedPlanId && (
+          <PlanEditor
+            key="edit-plan"
+            planId={selectedPlanId}
+            onBack={() => setCurrentScreen('plan')}
+            onSave={() => setCurrentScreen('plan')}
           />
         )}
 
