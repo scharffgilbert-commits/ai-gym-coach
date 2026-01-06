@@ -16,10 +16,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Utensils } from "lucide-react";
+import { Plus, Utensils, ScanBarcode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { BarcodeScanner } from "./BarcodeScanner";
 
 interface AddFoodEntryProps {
   onEntryAdded: () => void;
@@ -46,6 +47,7 @@ const quickFoods = [
 export function AddFoodEntry({ onEntryAdded }: AddFoodEntryProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [mealType, setMealType] = useState('snack');
   const [foodName, setFoodName] = useState('');
@@ -53,6 +55,21 @@ export function AddFoodEntry({ onEntryAdded }: AddFoodEntryProps) {
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
+
+  const handleProductFound = (product: {
+    name: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }) => {
+    setFoodName(product.name);
+    setCalories(product.calories.toString());
+    setProtein(product.protein.toString());
+    setCarbs(product.carbs.toString());
+    setFat(product.fat.toString());
+    setOpen(true);
+  };
 
   const resetForm = () => {
     setFoodName('');
@@ -125,130 +142,149 @@ export function AddFoodEntry({ onEntryAdded }: AddFoodEntryProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Essen hinzufügen
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Utensils className="h-5 w-5" />
-            Mahlzeit erfassen
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div>
-            <Label>Mahlzeit</Label>
-            <Select value={mealType} onValueChange={setMealType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {mealTypes.map((meal) => (
-                  <SelectItem key={meal.value} value={meal.value}>
-                    {meal.icon} {meal.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label className="text-muted-foreground text-sm">Schnellauswahl</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {quickFoods.map((food) => (
-                <Button
-                  key={food.name}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-auto py-2 justify-start"
-                  onClick={() => handleQuickAdd(food)}
-                  disabled={loading}
-                >
-                  <span className="truncate">{food.name}</span>
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                oder manuell eingeben
-              </span>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="foodName">Lebensmittel</Label>
-              <Input
-                id="foodName"
-                value={foodName}
-                onChange={(e) => setFoodName(e.target.value)}
-                placeholder="z.B. Hühnerbrust"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="calories">Kalorien</Label>
-                <Input
-                  id="calories"
-                  type="number"
-                  value={calories}
-                  onChange={(e) => setCalories(e.target.value)}
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label htmlFor="protein">Protein (g)</Label>
-                <Input
-                  id="protein"
-                  type="number"
-                  step="0.1"
-                  value={protein}
-                  onChange={(e) => setProtein(e.target.value)}
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label htmlFor="carbs">Kohlenhydrate (g)</Label>
-                <Input
-                  id="carbs"
-                  type="number"
-                  step="0.1"
-                  value={carbs}
-                  onChange={(e) => setCarbs(e.target.value)}
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label htmlFor="fat">Fett (g)</Label>
-                <Input
-                  id="fat"
-                  type="number"
-                  step="0.1"
-                  value={fat}
-                  onChange={(e) => setFat(e.target.value)}
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full" disabled={loading || !foodName}>
-              {loading ? 'Wird hinzugefügt...' : 'Hinzufügen'}
+    <>
+      <BarcodeScanner 
+        open={scannerOpen} 
+        onOpenChange={setScannerOpen}
+        onProductFound={handleProductFound}
+      />
+      
+      <div className="flex gap-2">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 flex-1">
+              <Plus className="h-4 w-4" />
+              Essen hinzufügen
             </Button>
-          </form>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </DialogTrigger>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Utensils className="h-5 w-5" />
+                Mahlzeit erfassen
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Mahlzeit</Label>
+                <Select value={mealType} onValueChange={setMealType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mealTypes.map((meal) => (
+                      <SelectItem key={meal.value} value={meal.value}>
+                        {meal.icon} {meal.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground text-sm">Schnellauswahl</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {quickFoods.map((food) => (
+                    <Button
+                      key={food.name}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-auto py-2 justify-start"
+                      onClick={() => handleQuickAdd(food)}
+                      disabled={loading}
+                    >
+                      <span className="truncate">{food.name}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    oder manuell eingeben
+                  </span>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="foodName">Lebensmittel</Label>
+                  <Input
+                    id="foodName"
+                    value={foodName}
+                    onChange={(e) => setFoodName(e.target.value)}
+                    placeholder="z.B. Hühnerbrust"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="calories">Kalorien</Label>
+                    <Input
+                      id="calories"
+                      type="number"
+                      value={calories}
+                      onChange={(e) => setCalories(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="protein">Protein (g)</Label>
+                    <Input
+                      id="protein"
+                      type="number"
+                      step="0.1"
+                      value={protein}
+                      onChange={(e) => setProtein(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="carbs">Kohlenhydrate (g)</Label>
+                    <Input
+                      id="carbs"
+                      type="number"
+                      step="0.1"
+                      value={carbs}
+                      onChange={(e) => setCarbs(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fat">Fett (g)</Label>
+                    <Input
+                      id="fat"
+                      type="number"
+                      step="0.1"
+                      value={fat}
+                      onChange={(e) => setFat(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full" disabled={loading || !foodName}>
+                  {loading ? 'Wird hinzugefügt...' : 'Hinzufügen'}
+                </Button>
+              </form>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={() => setScannerOpen(true)}
+          title="Barcode scannen"
+        >
+          <ScanBarcode className="h-5 w-5" />
+        </Button>
+      </div>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple, Calendar, Ruler } from 'lucide-react';
+import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple, Calendar, Ruler, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -14,9 +14,10 @@ interface DashboardProps {
   onViewNutrition?: () => void;
   onViewCalendar?: () => void;
   onViewMeasurements?: () => void;
+  onViewNotifications?: () => void;
 }
 
-export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar, onViewMeasurements }: DashboardProps) {
+export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar, onViewMeasurements, onViewNotifications }: DashboardProps) {
   const { user, workoutPlans, gyms } = useApp();
 
   // Mock data for demo
@@ -234,6 +235,30 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                 <div>
                   <p className="font-semibold text-foreground">Körpermaße</p>
                   <p className="text-sm text-muted-foreground">Fortschritt über Zeit tracken</p>
+                </div>
+              </div>
+              <div className="text-primary">→</div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Notifications Quick View */}
+        {onViewNotifications && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
+            className="fitness-card cursor-pointer"
+            onClick={onViewNotifications}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 shadow-lg">
+                  <Bell className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Benachrichtigungen</p>
+                  <p className="text-sm text-muted-foreground">Erinnerungen konfigurieren</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
