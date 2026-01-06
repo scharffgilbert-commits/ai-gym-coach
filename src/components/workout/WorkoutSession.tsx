@@ -97,7 +97,24 @@ export function WorkoutSession({ onComplete, onExit }: WorkoutSessionProps) {
 
   const currentExercise = exercises[currentExerciseIndex];
   const totalExercises = exercises.length;
-  const overallProgress = ((currentExerciseIndex * 100) + ((currentSetNumber - 1) / currentExercise.sets * 100)) / totalExercises;
+  const overallProgress = currentExercise && totalExercises > 0
+    ? ((currentExerciseIndex * 100) + ((currentSetNumber - 1) / currentExercise.sets * 100)) / totalExercises
+    : 0;
+
+  // Show loading or empty state if no exercises
+  if (!currentExercise || exercises.length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Dumbbell className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">No exercises available</p>
+          <Button variant="outline" className="mt-4" onClick={onExit}>
+            Go Back
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (currentExercise) {
