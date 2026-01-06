@@ -14,6 +14,8 @@ import { ProgressDashboard } from '@/components/progress/ProgressDashboard';
 import { ProfilePage } from '@/components/profile/ProfilePage';
 import { WorkoutPlanPage } from '@/components/plan/WorkoutPlanPage';
 import { PlanEditor } from '@/components/plan/PlanEditor';
+import { AchievementsPage } from '@/components/achievements/AchievementsPage';
+import { WaterPage } from '@/components/water/WaterPage';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Loader2 } from 'lucide-react';
 import { PlannedExercise } from '@/types/fitness';
@@ -28,7 +30,9 @@ type AppScreen =
   | 'select-workout'
   | 'workout'
   | 'progress'
-  | 'profile';
+  | 'profile'
+  | 'achievements'
+  | 'water';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -99,6 +103,8 @@ function AppContent() {
       workout: '/workout',
       progress: '/progress',
       profile: '/profile',
+      achievements: '/achievements',
+      water: '/water',
     };
     return paths[screen];
   };
@@ -139,6 +145,7 @@ function AppContent() {
             key="dashboard"
             onStartWorkout={() => setCurrentScreen('select-workout')}
             onAddEquipment={() => setCurrentScreen('add-equipment')}
+            onViewAchievements={() => setCurrentScreen('achievements')}
           />
         )}
 
@@ -208,6 +215,14 @@ function AppContent() {
             onLogout={handleLogout} 
             onResetProfile={() => setCurrentScreen('onboarding')}
           />
+        )}
+
+        {currentScreen === 'achievements' && (
+          <AchievementsPage key="achievements" />
+        )}
+
+        {currentScreen === 'water' && (
+          <WaterPage key="water" />
         )}
       </AnimatePresence>
 
