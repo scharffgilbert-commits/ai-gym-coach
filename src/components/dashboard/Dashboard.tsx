@@ -1,17 +1,19 @@
 import { motion } from 'framer-motion';
-import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell } from 'lucide-react';
+import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { WaterTracker } from '@/components/water/WaterTracker';
 import { useApp } from '@/contexts/AppContext';
 
 interface DashboardProps {
   onStartWorkout: () => void;
   onAddEquipment: () => void;
+  onViewAchievements?: () => void;
 }
 
-export function Dashboard({ onStartWorkout, onAddEquipment }: DashboardProps) {
+export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements }: DashboardProps) {
   const { user, workoutPlans, gyms } = useApp();
 
   // Mock data for demo
@@ -130,6 +132,39 @@ export function Dashboard({ onStartWorkout, onAddEquipment }: DashboardProps) {
             delay={0.25}
           />
         </div>
+
+        {/* Water Tracker */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <WaterTracker compact />
+        </motion.div>
+
+        {/* Achievements Quick View */}
+        {onViewAchievements && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="fitness-card cursor-pointer"
+            onClick={onViewAchievements}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl gradient-primary shadow-glow">
+                  <Trophy className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Achievements</p>
+                  <p className="text-sm text-muted-foreground">Sammle Badges und Meilensteine</p>
+                </div>
+              </div>
+              <div className="text-primary">→</div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Today's Exercises Preview */}
         {hasEquipment && todaysPlan.length > 0 && (

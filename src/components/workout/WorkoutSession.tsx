@@ -7,6 +7,7 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { PlannedExercise, CompletedSet } from '@/types/fitness';
 import { useWorkoutProgress } from '@/hooks/useWorkoutProgress';
+import { useAchievements } from '@/hooks/useAchievements';
 
 interface WorkoutSessionProps {
   onComplete: () => void;
@@ -68,6 +69,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
   const { gyms } = useApp();
   const { user: authUser } = useAuth();
   const { saveWorkoutSession } = useWorkoutProgress(authUser?.id);
+  const { checkWorkoutAchievements } = useAchievements();
   
   const [exercises] = useState<PlannedExercise[]>(() => {
     // Use provided exercises first
@@ -455,6 +457,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
                     totalDuration: workoutDuration,
                   };
                   await saveWorkoutSession(workoutData);
+                  await checkWorkoutAchievements();
                   setIsSaving(false);
                   onComplete();
                 }}

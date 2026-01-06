@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          key: string
+          name: string
+          threshold: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          key: string
+          name: string
+          threshold?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          key?: string
+          name?: string
+          threshold?: number
+        }
+        Relationships: []
+      }
       completed_exercises: {
         Row: {
           completed_at: string
@@ -409,6 +442,59 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      water_intake: {
+        Row: {
+          amount_ml: number
+          created_at: string
+          id: string
+          logged_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_ml?: number
+          created_at?: string
+          id?: string
+          logged_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_ml?: number
+          created_at?: string
+          id?: string
+          logged_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       workout_plans: {
         Row: {
