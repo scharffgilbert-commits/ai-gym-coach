@@ -11,6 +11,7 @@ import { useWorkoutProgress } from '@/hooks/useWorkoutProgress';
 interface WorkoutSessionProps {
   onComplete: () => void;
   onExit: () => void;
+  initialExercises?: PlannedExercise[];
 }
 
 // Mock workout data
@@ -63,26 +64,33 @@ const mockExercises: PlannedExercise[] = [
 
 type WorkoutPhase = 'exercise' | 'rest' | 'summary';
 
-export function WorkoutSession({ onComplete, onExit }: WorkoutSessionProps) {
+export function WorkoutSession({ onComplete, onExit, initialExercises }: WorkoutSessionProps) {
   const { gyms } = useApp();
   const { user: authUser } = useAuth();
   const { saveWorkoutSession } = useWorkoutProgress(authUser?.id);
   
-  const [exercises] = useState<PlannedExercise[]>(
-    gyms[0]?.machines.length > 0
-      ? gyms[0].machines.slice(0, 4).map((m, i) => ({
-          id: m.id,
-          machineId: m.id,
-          machineName: m.name,
-          order: i + 1,
-          sets: 3,
-          targetReps: 12,
-          targetWeight: 40,
-          restSeconds: 90,
-          dayOfWeek: new Date().getDay(),
-        }))
-      : mockExercises
-  );
+  const [exercises] = useState<PlannedExercise[]>(() => {
+    // Use provided exercises first
+    if (initialExercises && initialExercises.length > 0) {
+      return initialExercises;
+    }
+    // Fall back to gym machines
+    if (gyms[0]?.machines.length > 0) {
+      return gyms[0].machines.slice(0, 4).map((m, i) => ({
+        id: m.id,
+        machineId: m.id,
+        machineName: m.name,
+        order: i + 1,
+        sets: 3,
+        targetReps: 12,
+        targetWeight: 40,
+        restSeconds: 90,
+        dayOfWeek: new Date().getDay(),
+      }));
+    }
+    // Fall back to mock exercises
+    return mockExercises;
+  });
 
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSetNumber, setCurrentSetNumber] = useState(1);
