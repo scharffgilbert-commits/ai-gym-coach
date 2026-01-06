@@ -2,7 +2,11 @@ import { motion } from 'framer-motion';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { WaterTracker } from '@/components/water/WaterTracker';
 
-export function WaterPage() {
+interface WaterPageProps {
+  onBack?: () => void;
+}
+
+export function WaterPage({ onBack }: WaterPageProps) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -13,6 +17,8 @@ export function WaterPage() {
       <PageHeader
         title="Wasser-Tracker"
         subtitle="Bleib hydriert!"
+        showBack={!!onBack}
+        onBack={onBack}
       />
 
       <div className="px-4">

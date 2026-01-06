@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy } from 'lucide-react';
+import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -11,9 +11,10 @@ interface DashboardProps {
   onStartWorkout: () => void;
   onAddEquipment: () => void;
   onViewAchievements?: () => void;
+  onViewNutrition?: () => void;
 }
 
-export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements }: DashboardProps) {
+export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition }: DashboardProps) {
   const { user, workoutPlans, gyms } = useApp();
 
   // Mock data for demo
@@ -159,6 +160,30 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements }
                 <div>
                   <p className="font-semibold text-foreground">Achievements</p>
                   <p className="text-sm text-muted-foreground">Sammle Badges und Meilensteine</p>
+                </div>
+              </div>
+              <div className="text-primary">→</div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Nutrition Quick View */}
+        {onViewNutrition && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="fitness-card cursor-pointer"
+            onClick={onViewNutrition}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
+                  <Apple className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Ernährung</p>
+                  <p className="text-sm text-muted-foreground">Kalorien & Makros tracken</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
