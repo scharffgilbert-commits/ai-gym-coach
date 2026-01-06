@@ -17,6 +17,7 @@ import { PlanEditor } from '@/components/plan/PlanEditor';
 import { AchievementsPage } from '@/components/achievements/AchievementsPage';
 import { WaterPage } from '@/components/water/WaterPage';
 import { NutritionPage } from '@/components/nutrition/NutritionPage';
+import { CalendarPage } from '@/components/calendar/CalendarPage';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Loader2 } from 'lucide-react';
 import { PlannedExercise } from '@/types/fitness';
@@ -34,7 +35,8 @@ type AppScreen =
   | 'profile'
   | 'achievements'
   | 'water'
-  | 'nutrition';
+  | 'nutrition'
+  | 'calendar';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -108,6 +110,7 @@ function AppContent() {
       achievements: '/achievements',
       water: '/water',
       nutrition: '/nutrition',
+      calendar: '/calendar',
     };
     return paths[screen];
   };
@@ -150,6 +153,7 @@ function AppContent() {
             onAddEquipment={() => setCurrentScreen('add-equipment')}
             onViewAchievements={() => setCurrentScreen('achievements')}
             onViewNutrition={() => setCurrentScreen('nutrition')}
+            onViewCalendar={() => setCurrentScreen('calendar')}
           />
         )}
 
@@ -231,6 +235,10 @@ function AppContent() {
 
         {currentScreen === 'nutrition' && (
           <NutritionPage key="nutrition" onBack={() => setCurrentScreen('dashboard')} />
+        )}
+
+        {currentScreen === 'calendar' && (
+          <CalendarPage key="calendar" onBack={() => setCurrentScreen('dashboard')} />
         )}
       </AnimatePresence>
 
