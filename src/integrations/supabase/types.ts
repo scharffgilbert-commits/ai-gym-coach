@@ -300,6 +300,81 @@ export type Database = {
           },
         ]
       }
+      nutrition_entries: {
+        Row: {
+          calories: number
+          carbs_g: number
+          created_at: string
+          fat_g: number
+          food_name: string
+          id: string
+          logged_at: string
+          meal_type: string
+          protein_g: number
+          serving_size: string | null
+          user_id: string
+        }
+        Insert: {
+          calories?: number
+          carbs_g?: number
+          created_at?: string
+          fat_g?: number
+          food_name: string
+          id?: string
+          logged_at?: string
+          meal_type?: string
+          protein_g?: number
+          serving_size?: string | null
+          user_id: string
+        }
+        Update: {
+          calories?: number
+          carbs_g?: number
+          created_at?: string
+          fat_g?: number
+          food_name?: string
+          id?: string
+          logged_at?: string
+          meal_type?: string
+          protein_g?: number
+          serving_size?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      nutrition_goals: {
+        Row: {
+          created_at: string
+          daily_calories: number
+          daily_carbs_g: number
+          daily_fat_g: number
+          daily_protein_g: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_calories?: number
+          daily_carbs_g?: number
+          daily_fat_g?: number
+          daily_protein_g?: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_calories?: number
+          daily_carbs_g?: number
+          daily_fat_g?: number
+          daily_protein_g?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       planned_exercises: {
         Row: {
           created_at: string
