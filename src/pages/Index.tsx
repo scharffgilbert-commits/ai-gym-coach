@@ -9,11 +9,13 @@ import { Dashboard } from '@/components/dashboard/Dashboard';
 import { AddEquipment } from '@/components/equipment/AddEquipment';
 import { EquipmentList } from '@/components/equipment/EquipmentList';
 import { WorkoutSession } from '@/components/workout/WorkoutSession';
+import { PlanSelector } from '@/components/workout/PlanSelector';
 import { ProgressDashboard } from '@/components/progress/ProgressDashboard';
 import { ProfilePage } from '@/components/profile/ProfilePage';
 import { WorkoutPlanPage } from '@/components/plan/WorkoutPlanPage';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Loader2 } from 'lucide-react';
+import { PlannedExercise } from '@/types/fitness';
 
 type AppScreen = 
   | 'onboarding'
@@ -21,6 +23,7 @@ type AppScreen =
   | 'equipment'
   | 'add-equipment'
   | 'plan'
+  | 'select-workout'
   | 'workout'
   | 'progress'
   | 'profile';
@@ -31,6 +34,7 @@ function AppContent() {
   const { user, logout, setUser } = useApp();
   const { loadProfileData } = useProfileSync();
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('onboarding');
+  const [selectedExercises, setSelectedExercises] = useState<PlannedExercise[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Redirect to auth if not logged in
@@ -87,6 +91,7 @@ function AppContent() {
       equipment: '/equipment',
       'add-equipment': '/equipment/add',
       plan: '/plan',
+      'select-workout': '/select-workout',
       workout: '/workout',
       progress: '/progress',
       profile: '/profile',
@@ -106,7 +111,12 @@ function AppContent() {
     if (screen) setCurrentScreen(screen);
   };
 
-  const showNav = !['onboarding', 'workout', 'add-equipment'].includes(currentScreen);
+  const showNav = !['onboarding', 'workout', 'add-equipment', 'select-workout'].includes(currentScreen);
+
+  const handleSelectPlan = (exercises: PlannedExercise[]) => {
+    setSelectedExercises(exercises);
+    setCurrentScreen('workout');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -118,7 +128,7 @@ function AppContent() {
         {currentScreen === 'dashboard' && (
           <Dashboard
             key="dashboard"
-            onStartWorkout={() => setCurrentScreen('workout')}
+            onStartWorkout={() => setCurrentScreen('select-workout')}
             onAddEquipment={() => setCurrentScreen('add-equipment')}
           />
         )}
@@ -142,15 +152,30 @@ function AppContent() {
         {currentScreen === 'plan' && (
           <WorkoutPlanPage
             key="plan"
-            onStartWorkout={() => setCurrentScreen('workout')}
+            onStartWorkout={() => setCurrentScreen('select-workout')}
+          />
+        )}
+
+        {currentScreen === 'select-workout' && (
+          <PlanSelector
+            key="select-workout"
+            onSelectPlan={handleSelectPlan}
+            onBack={() => setCurrentScreen('dashboard')}
           />
         )}
 
         {currentScreen === 'workout' && (
           <WorkoutSession
             key="workout"
-            onComplete={() => setCurrentScreen('dashboard')}
-            onExit={() => setCurrentScreen('dashboard')}
+            onComplete={() => {
+              setSelectedExercises([]);
+              setCurrentScreen('dashboard');
+            }}
+            onExit={() => {
+              setSelectedExercises([]);
+              setCurrentScreen('dashboard');
+            }}
+            initialExercises={selectedExercises}
           />
         )}
 
