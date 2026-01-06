@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Sparkles, Play, Clock, Dumbbell, ChevronRight, Loader2, Brain } from 'lucide-react';
+import { Sparkles, Play, Clock, Dumbbell, ChevronRight, Loader2, Brain, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
@@ -8,14 +8,24 @@ import { useMemo } from 'react';
 
 interface WorkoutPlanPageProps {
   onStartWorkout: () => void;
+  onEditPlan?: (planId: string) => void;
 }
 
-export function WorkoutPlanPage({ onStartWorkout }: WorkoutPlanPageProps) {
+export function WorkoutPlanPage({ onStartWorkout, onEditPlan }: WorkoutPlanPageProps) {
   const { fitnessGoals, workoutPlans } = useApp();
   const { generateWorkout, isGenerating, generatedPlan } = useWorkoutGeneration();
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const today = days[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+
+  // Get current plan ID
+  const currentPlanId = useMemo(() => {
+    if (workoutPlans.length > 0) {
+      const plan = workoutPlans.find(p => p.aiGenerated) || workoutPlans[0];
+      return plan.id;
+    }
+    return null;
+  }, [workoutPlans]);
 
   // Build weekly plan from the most recent AI-generated plan or generated plan
   const weeklyPlan = useMemo(() => {
@@ -118,7 +128,19 @@ export function WorkoutPlanPage({ onStartWorkout }: WorkoutPlanPageProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h3 className="mb-4 text-lg font-semibold text-foreground">Weekly Schedule</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-foreground">Weekly Schedule</h3>
+            {currentPlanId && onEditPlan && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => onEditPlan(currentPlanId)}
+              >
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit Plan
+              </Button>
+            )}
+          </div>
           <div className="space-y-3">
             {days.map((day, i) => {
               const exercises = weeklyPlan[day] || [];
