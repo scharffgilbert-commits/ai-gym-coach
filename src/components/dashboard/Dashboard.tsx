@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple } from 'lucide-react';
+import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -12,9 +12,10 @@ interface DashboardProps {
   onAddEquipment: () => void;
   onViewAchievements?: () => void;
   onViewNutrition?: () => void;
+  onViewCalendar?: () => void;
 }
 
-export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition }: DashboardProps) {
+export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar }: DashboardProps) {
   const { user, workoutPlans, gyms } = useApp();
 
   // Mock data for demo
@@ -184,6 +185,30 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                 <div>
                   <p className="font-semibold text-foreground">Ernährung</p>
                   <p className="text-sm text-muted-foreground">Kalorien & Makros tracken</p>
+                </div>
+              </div>
+              <div className="text-primary">→</div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Calendar Quick View */}
+        {onViewCalendar && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="fitness-card cursor-pointer"
+            onClick={onViewCalendar}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg">
+                  <Calendar className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Workout Kalender</p>
+                  <p className="text-sm text-muted-foreground">Streak & Trainingsübersicht</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
