@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple, Calendar, Ruler, Bell } from 'lucide-react';
+import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple, Calendar, Ruler, Bell, Watch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -16,9 +16,10 @@ interface DashboardProps {
   onViewCalendar?: () => void;
   onViewMeasurements?: () => void;
   onViewNotifications?: () => void;
+  onViewHealth?: () => void;
 }
 
-export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar, onViewMeasurements, onViewNotifications }: DashboardProps) {
+export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar, onViewMeasurements, onViewNotifications, onViewHealth }: DashboardProps) {
   const { user, workoutPlans, gyms } = useApp();
 
   // Mock data for demo
@@ -265,6 +266,30 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                 <div>
                   <p className="font-semibold text-foreground">Benachrichtigungen</p>
                   <p className="text-sm text-muted-foreground">Erinnerungen konfigurieren</p>
+                </div>
+              </div>
+              <div className="text-primary">→</div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Health Data Quick View */}
+        {onViewHealth && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="fitness-card cursor-pointer"
+            onClick={onViewHealth}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg">
+                  <Watch className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Health Daten</p>
+                  <p className="text-sm text-muted-foreground">Wearable & Fitness Tracking</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
