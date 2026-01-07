@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Dumbbell, Mail, Lock, Eye, EyeOff, Loader2, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { useLanguage } from '@/i18n/LanguageContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Language } from '@/i18n/translations';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -16,6 +24,7 @@ const authSchema = z.object({
 
 export default function Auth() {
   const navigate = useNavigate();
+  const { t, language, setLanguage, languageFlags, languageNames, availableLanguages } = useLanguage();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -78,14 +87,14 @@ export default function Auth() {
 
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            toast.error('Invalid email or password');
+            toast.error(t('login') + ' failed');
           } else {
             toast.error(error.message);
           }
           return;
         }
 
-        toast.success('Welcome back!');
+        toast.success(t('welcome_back') + '!');
       } else {
         const redirectUrl = `${window.location.origin}/`;
         
@@ -102,16 +111,14 @@ export default function Auth() {
 
         if (error) {
           if (error.message.includes('already registered')) {
-            toast.error('This email is already registered. Please sign in.');
+            toast.error('Email already registered');
           } else {
             toast.error(error.message);
           }
           return;
         }
 
-        toast.success('Account created!', {
-          description: 'You are now signed in.',
-        });
+        toast.success(t('create_account') + '!');
       }
     } catch (error) {
       toast.error('An unexpected error occurred');
@@ -121,7 +128,31 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-2">
+              <Globe className="h-4 w-4" />
+              <span>{languageFlags[language]}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {availableLanguages.map((lang) => (
+              <DropdownMenuItem
+                key={lang}
+                onClick={() => setLanguage(lang as Language)}
+                className={language === lang ? 'bg-primary/10' : ''}
+              >
+                <span className="mr-2">{languageFlags[lang as Language]}</span>
+                {languageNames[lang as Language]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -138,20 +169,20 @@ export default function Auth() {
         className="w-full max-w-sm"
       >
         <h1 className="text-center text-3xl font-bold text-foreground mb-2">
-          {isLogin ? 'Welcome Back' : 'Create Account'}
+          {isLogin ? t('welcome_back') : t('create_account')}
         </h1>
         <p className="text-center text-muted-foreground mb-8">
-          {isLogin ? 'Sign in to continue your fitness journey' : 'Start your AI-powered fitness journey'}
+          {isLogin ? t('login_subtitle') : t('signup_subtitle')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div className="space-y-2">
-              <Label htmlFor="name">Name (optional)</Label>
+              <Label htmlFor="name">{t('name')}</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Your name"
+                placeholder={t('name')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="h-12"
@@ -160,7 +191,7 @@ export default function Auth() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('email')}</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
@@ -178,7 +209,7 @@ export default function Auth() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('password')}</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
@@ -212,10 +243,10 @@ export default function Auth() {
             {isLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                {isLogin ? 'Signing in...' : 'Creating account...'}
+                {t('loading')}
               </>
             ) : (
-              isLogin ? 'Sign In' : 'Create Account'
+              isLogin ? t('login') : t('signup')
             )}
           </Button>
         </form>
@@ -229,9 +260,9 @@ export default function Auth() {
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             {isLogin ? (
-              <>Don't have an account? <span className="text-primary font-medium">Sign up</span></>
+              <>{t('no_account')} <span className="text-primary font-medium">{t('signup')}</span></>
             ) : (
-              <>Already have an account? <span className="text-primary font-medium">Sign in</span></>
+              <>{t('have_account')} <span className="text-primary font-medium">{t('login')}</span></>
             )}
           </button>
         </div>
