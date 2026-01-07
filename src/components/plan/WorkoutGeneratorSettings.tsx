@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Calendar, Sparkles, Loader2, X, Zap } from 'lucide-react';
+import { Clock, Calendar, Sparkles, Loader2, Zap, Save } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -43,11 +46,72 @@ export function WorkoutGeneratorSettings({
   onGenerate,
   isGenerating,
 }: WorkoutGeneratorSettingsProps) {
+  const { user } = useAuth();
   const [minutesPerWorkout, setMinutesPerWorkout] = useState(45);
   const [preferredDays, setPreferredDays] = useState<string[]>(['Monday', 'Wednesday', 'Friday']);
   const [intensity, setIntensity] = useState<'light' | 'moderate' | 'intense'>('moderate');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load saved preferences
+  useEffect(() => {
+    const loadPreferences = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('workout_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (error) throw error;
+        
+        if (data) {
+          setMinutesPerWorkout(data.minutes_per_workout || 45);
+          setPreferredDays(data.preferred_days || ['Monday', 'Wednesday', 'Friday']);
+          setIntensity((data.intensity as typeof intensity) || 'moderate');
+        }
+      } catch (error) {
+        console.error('Error loading preferences:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (open) {
+      loadPreferences();
+    }
+  }, [user, open]);
+
+  // Save preferences to database
+  const savePreferences = async () => {
+    if (!user) return;
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('workout_preferences')
+        .upsert({
+          user_id: user.id,
+          minutes_per_workout: minutesPerWorkout,
+          preferred_days: preferredDays,
+          intensity,
+        }, { onConflict: 'user_id' });
+      
+      if (error) throw error;
+      toast.success('Einstellungen gespeichert');
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      toast.error('Fehler beim Speichern');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleGenerate = () => {
+    // Save preferences when generating
+    savePreferences();
     onGenerate({
       minutesPerWorkout,
       workoutsPerWeek: preferredDays.length,
@@ -160,6 +224,17 @@ export function WorkoutGeneratorSettings({
         </div>
 
         <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={savePreferences}
+            disabled={isSaving || isGenerating}
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+          </Button>
           <Button
             variant="outline"
             className="flex-1"

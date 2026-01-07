@@ -667,6 +667,36 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          intensity: string | null
+          minutes_per_workout: number | null
+          preferred_days: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          intensity?: string | null
+          minutes_per_workout?: number | null
+          preferred_days?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          intensity?: string | null
+          minutes_per_workout?: number | null
+          preferred_days?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workout_sessions: {
         Row: {
           calories_burned: number | null
