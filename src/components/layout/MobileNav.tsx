@@ -1,19 +1,21 @@
 import { motion } from 'framer-motion';
 import { Home, Dumbbell, Calendar, User, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { TranslationKey } from '@/i18n/translations';
 
 interface NavItem {
   icon: typeof Home;
-  label: string;
+  labelKey: TranslationKey;
   path: string;
 }
 
 const navItems: NavItem[] = [
-  { icon: Home, label: 'Home', path: '/dashboard' },
-  { icon: Dumbbell, label: 'Equipment', path: '/equipment' },
-  { icon: Calendar, label: 'Plan', path: '/plan' },
-  { icon: BarChart3, label: 'Progress', path: '/progress' },
-  { icon: User, label: 'Profile', path: '/profile' },
+  { icon: Home, labelKey: 'nav_home', path: '/dashboard' },
+  { icon: Dumbbell, labelKey: 'nav_equipment', path: '/equipment' },
+  { icon: Calendar, labelKey: 'nav_plan', path: '/plan' },
+  { icon: BarChart3, labelKey: 'nav_progress', path: '/progress' },
+  { icon: User, labelKey: 'nav_profile', path: '/profile' },
 ];
 
 interface MobileNavProps {
@@ -22,6 +24,8 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ currentPath, onNavigate }: MobileNavProps) {
+  const { t } = useLanguage();
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-xl safe-area-bottom">
       <div className="flex items-center justify-around py-2 px-4">
@@ -58,7 +62,7 @@ export function MobileNav({ currentPath, onNavigate }: MobileNavProps) {
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
-                {item.label}
+                {t(item.labelKey)}
               </span>
             </button>
           );
