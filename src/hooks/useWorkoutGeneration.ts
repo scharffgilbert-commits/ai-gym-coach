@@ -16,12 +16,19 @@ interface GeneratedPlan {
   tips: string[];
 }
 
+export interface WorkoutPreferences {
+  minutesPerWorkout: number;
+  workoutsPerWeek: number;
+  preferredDays: string[];
+  intensity: 'light' | 'moderate' | 'intense';
+}
+
 export function useWorkoutGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedPlan | null>(null);
   const { fitnessGoals, gyms, healthProfile, setWorkoutPlans, workoutPlans } = useApp();
 
-  const generateWorkout = async () => {
+  const generateWorkout = async (preferences?: WorkoutPreferences) => {
     setIsGenerating(true);
 
     try {
@@ -53,7 +60,7 @@ export function useWorkoutGeneration() {
       } : undefined;
 
       const { data, error } = await supabase.functions.invoke('generate-workout', {
-        body: { goals, equipment, healthProfile: healthData },
+        body: { goals, equipment, healthProfile: healthData, preferences },
       });
 
       if (error) {
