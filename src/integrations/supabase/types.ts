@@ -190,6 +190,62 @@ export type Database = {
           },
         ]
       }
+      equipment_usage: {
+        Row: {
+          avg_weight: number | null
+          comfort_rating: number | null
+          created_at: string
+          id: string
+          last_used_at: string | null
+          machine_id: string
+          max_weight: number | null
+          notes: string | null
+          total_reps: number | null
+          total_sets: number | null
+          updated_at: string
+          usage_count: number | null
+          user_id: string
+        }
+        Insert: {
+          avg_weight?: number | null
+          comfort_rating?: number | null
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          machine_id: string
+          max_weight?: number | null
+          notes?: string | null
+          total_reps?: number | null
+          total_sets?: number | null
+          updated_at?: string
+          usage_count?: number | null
+          user_id: string
+        }
+        Update: {
+          avg_weight?: number | null
+          comfort_rating?: number | null
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          machine_id?: string
+          max_weight?: number | null
+          notes?: string | null
+          total_reps?: number | null
+          total_sets?: number | null
+          updated_at?: string
+          usage_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_usage_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "machines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fitness_goals: {
         Row: {
           created_at: string
@@ -226,9 +282,34 @@ export type Database = {
         }
         Relationships: []
       }
+      gym_chains: {
+        Row: {
+          created_at: string
+          default_equipment: Json | null
+          id: string
+          logo_url: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          default_equipment?: Json | null
+          id?: string
+          logo_url?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          default_equipment?: Json | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
       gyms: {
         Row: {
           address: string | null
+          chain_id: string | null
           created_at: string
           id: string
           name: string
@@ -237,6 +318,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          chain_id?: string | null
           created_at?: string
           id?: string
           name: string
@@ -245,13 +327,22 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          chain_id?: string | null
           created_at?: string
           id?: string
           name?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "gyms_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "gym_chains"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       health_profiles: {
         Row: {
@@ -496,6 +587,7 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          equipment_onboarding_complete: boolean | null
           id: string
           name: string | null
           onboarding_complete: boolean | null
@@ -508,6 +600,7 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string
+          equipment_onboarding_complete?: boolean | null
           id?: string
           name?: string | null
           onboarding_complete?: boolean | null
@@ -520,6 +613,7 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string
+          equipment_onboarding_complete?: boolean | null
           id?: string
           name?: string | null
           onboarding_complete?: boolean | null

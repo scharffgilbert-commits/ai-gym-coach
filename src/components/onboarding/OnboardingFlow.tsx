@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Dumbbell, Heart, Target, Shield, Sparkles } from 'lucide-react';
+import { ChevronRight, Dumbbell, Heart, Target, Shield, Sparkles, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProfileSync } from '@/hooks/useProfileSync';
 import { OnboardingStep, Injury, BodyRegion } from '@/types/fitness';
 import { toast } from 'sonner';
+import { EquipmentOnboarding } from './EquipmentOnboarding';
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -57,7 +58,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     disclaimer: false,
   });
 
-  const steps: OnboardingStep[] = ['welcome', 'health-basics', 'health-screening', 'goals', 'experience', 'consent', 'complete'];
+  const steps: OnboardingStep[] = ['welcome', 'health-basics', 'health-screening', 'goals', 'experience', 'consent', 'equipment', 'complete'];
   const currentIndex = steps.indexOf(onboardingStep);
 
   const goNext = () => {
@@ -638,6 +639,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </Button>
               </div>
             </div>
+          )}
+
+          {/* Equipment Step */}
+          {onboardingStep === 'equipment' && (
+            <EquipmentOnboarding
+              onComplete={goNext}
+              onSkip={goNext}
+            />
           )}
 
           {/* Complete Step */}

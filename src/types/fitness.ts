@@ -186,4 +186,5 @@ export type OnboardingStep =
   | 'goals'
   | 'experience'
   | 'consent'
+  | 'equipment'
   | 'complete';
