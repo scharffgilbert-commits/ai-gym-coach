@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
-import { User, Settings, Bell, Shield, LogOut, ChevronRight, Moon, Sun, Crown, Target, RefreshCw } from 'lucide-react';
+import { User, Settings, Bell, Shield, LogOut, ChevronRight, Moon, Sun, Crown, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
+import { LanguageSelector } from '@/components/settings/LanguageSelector';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface ProfilePageProps {
   onLogout: () => void;
@@ -11,6 +13,7 @@ interface ProfilePageProps {
 
 export function ProfilePage({ onLogout, onResetProfile }: ProfilePageProps) {
   const { user, healthProfile, fitnessGoals, isDarkMode, toggleDarkMode } = useApp();
+  const { t } = useLanguage();
 
   const menuItems = [
     {
@@ -148,6 +151,16 @@ export function ProfilePage({ onLogout, onResetProfile }: ProfilePageProps) {
             />
           </div>
         </motion.button>
+
+        {/* Language Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+          className="fitness-card"
+        >
+          <LanguageSelector />
+        </motion.div>
 
         {/* Menu Items */}
         <motion.div
