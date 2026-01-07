@@ -114,13 +114,28 @@ export function useEquipmentUsage() {
     if (!user || rating < 1 || rating > 5) return;
 
     try {
-      await supabase
+      // First check if record exists
+      const { data: existing } = await supabase
         .from('equipment_usage')
-        .upsert({
-          user_id: user.id,
-          machine_id: machineId,
-          comfort_rating: rating,
-        }, { onConflict: 'user_id,machine_id' });
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('machine_id', machineId)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('equipment_usage')
+          .update({ comfort_rating: rating })
+          .eq('id', existing.id);
+      } else {
+        await supabase
+          .from('equipment_usage')
+          .insert({
+            user_id: user.id,
+            machine_id: machineId,
+            comfort_rating: rating,
+          });
+      }
     } catch (error) {
       console.error('Error rating equipment:', error);
     }
