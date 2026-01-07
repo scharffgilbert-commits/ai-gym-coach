@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
-import { Activity, Battery, BatteryLow, BatteryMedium, BatteryFull, Clock, Zap, Moon } from 'lucide-react';
+import { Activity, BatteryLow, BatteryMedium, BatteryFull, Clock, Zap, Moon } from 'lucide-react';
 import { useRecoveryStatus, MUSCLE_GROUP_LABELS } from '@/hooks/useRecoveryStatus';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 
 export function RecoveryRecommendations() {
@@ -145,13 +144,9 @@ export function RecoveryRecommendations() {
                 <span>{muscle.hoursAgo}h</span>
               </div>
             </div>
-            <div className="relative">
-              <Progress 
-                value={muscle.recoveryPercent} 
-                className="h-2"
-              />
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div 
-                className={`absolute top-0 left-0 h-full rounded-full transition-all ${getProgressColor(muscle.recoveryPercent)}`}
+                className={`h-full rounded-full transition-all ${getProgressColor(muscle.recoveryPercent)}`}
                 style={{ width: `${muscle.recoveryPercent}%` }}
               />
             </div>

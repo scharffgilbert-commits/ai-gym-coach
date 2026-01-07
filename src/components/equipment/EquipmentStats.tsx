@@ -36,6 +36,7 @@ export function EquipmentStats() {
       }
     };
     loadStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
@@ -59,7 +60,7 @@ export function EquipmentStats() {
     return null;
   }
 
-  const maxUsageCount = Math.max(...equipment.map((e) => e.usage_count));
+  const maxUsageCount = Math.max(...equipment.map((e) => e.usage_count), 1);
 
   return (
     <motion.div
@@ -134,7 +135,7 @@ export function EquipmentStats() {
           </div>
           <div>
             <p className="text-2xl font-bold text-foreground">
-              {Math.max(...equipment.map((e) => e.max_weight))}kg
+              {equipment.length > 0 ? Math.max(...equipment.map((e) => e.max_weight)) : 0}kg
             </p>
             <p className="text-xs text-muted-foreground">Max Gewicht</p>
           </div>
