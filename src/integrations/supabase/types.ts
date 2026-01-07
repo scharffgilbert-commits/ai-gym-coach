@@ -628,6 +628,7 @@ export type Database = {
           created_at: string
           equipment_onboarding_complete: boolean | null
           id: string
+          language: string | null
           name: string | null
           onboarding_complete: boolean | null
           phone: string | null
@@ -641,6 +642,7 @@ export type Database = {
           created_at?: string
           equipment_onboarding_complete?: boolean | null
           id?: string
+          language?: string | null
           name?: string | null
           onboarding_complete?: boolean | null
           phone?: string | null
@@ -654,6 +656,7 @@ export type Database = {
           created_at?: string
           equipment_onboarding_complete?: boolean | null
           id?: string
+          language?: string | null
           name?: string | null
           onboarding_complete?: boolean | null
           phone?: string | null
