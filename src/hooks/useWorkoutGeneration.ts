@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { PlannedExercise, WorkoutPlan } from '@/types/fitness';
 import { toast } from 'sonner';
 
@@ -23,15 +24,62 @@ export interface WorkoutPreferences {
   intensity: 'light' | 'moderate' | 'intense';
 }
 
+interface EquipmentUsageData {
+  machineName: string;
+  usageCount: number;
+  totalSets: number;
+  totalReps: number;
+  maxWeight: number;
+  avgWeight: number;
+  comfortRating?: number;
+  lastUsed?: string;
+}
+
 export function useWorkoutGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedPlan | null>(null);
   const { fitnessGoals, gyms, healthProfile, setWorkoutPlans, workoutPlans } = useApp();
+  const { user } = useAuth();
+
+  const fetchEquipmentUsage = async (): Promise<EquipmentUsageData[]> => {
+    if (!user) return [];
+
+    try {
+      const { data, error } = await supabase
+        .from('equipment_usage')
+        .select(`
+          *,
+          machines:machine_id (
+            name
+          )
+        `)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      return (data || []).map(usage => ({
+        machineName: (usage.machines as any)?.name || 'Unknown',
+        usageCount: usage.usage_count || 0,
+        totalSets: usage.total_sets || 0,
+        totalReps: usage.total_reps || 0,
+        maxWeight: Number(usage.max_weight) || 0,
+        avgWeight: Number(usage.avg_weight) || 0,
+        comfortRating: usage.comfort_rating || undefined,
+        lastUsed: usage.last_used_at || undefined,
+      }));
+    } catch (error) {
+      console.error('Error fetching equipment usage:', error);
+      return [];
+    }
+  };
 
   const generateWorkout = async (preferences?: WorkoutPreferences) => {
     setIsGenerating(true);
 
     try {
+      // Fetch equipment usage data for personalization
+      const equipmentUsage = await fetchEquipmentUsage();
+
       const equipment = gyms.flatMap(gym => 
         gym.machines.map(m => ({
           name: m.name,
@@ -60,7 +108,13 @@ export function useWorkoutGeneration() {
       } : undefined;
 
       const { data, error } = await supabase.functions.invoke('generate-workout', {
-        body: { goals, equipment, healthProfile: healthData, preferences },
+        body: { 
+          goals, 
+          equipment, 
+          healthProfile: healthData, 
+          preferences,
+          equipmentUsage: equipmentUsage.length > 0 ? equipmentUsage : undefined,
+        },
       });
 
       if (error) {

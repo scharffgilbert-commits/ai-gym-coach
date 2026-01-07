@@ -5,6 +5,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface EquipmentUsage {
+  machineName: string;
+  usageCount: number;
+  totalSets: number;
+  totalReps: number;
+  maxWeight: number;
+  avgWeight: number;
+  comfortRating?: number;
+  lastUsed?: string;
+}
+
 interface WorkoutRequest {
   goals: {
     experienceLevel: string;
@@ -27,6 +38,7 @@ interface WorkoutRequest {
     preferredDays: string[];
     intensity: 'light' | 'moderate' | 'intense';
   };
+  equipmentUsage?: EquipmentUsage[];
 }
 
 serve(async (req) => {
@@ -35,7 +47,7 @@ serve(async (req) => {
   }
 
   try {
-    const { goals, equipment, healthProfile, preferences } = await req.json() as WorkoutRequest;
+    const { goals, equipment, healthProfile, preferences, equipmentUsage } = await req.json() as WorkoutRequest;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -47,6 +59,32 @@ serve(async (req) => {
     const injuryWarnings = healthProfile?.injuries?.length 
       ? `\n\nIMPORTANT - User has injuries to avoid:\n${healthProfile.injuries.map(i => `- ${i.area} (${i.severity})`).join("\n")}`
       : "";
+
+    // Build equipment usage insights for AI
+    let usageInsights = "";
+    if (equipmentUsage && equipmentUsage.length > 0) {
+      const favoriteEquipment = equipmentUsage
+        .filter(u => u.usageCount >= 3)
+        .sort((a, b) => b.usageCount - a.usageCount)
+        .slice(0, 5);
+      
+      const highComfortEquipment = equipmentUsage
+        .filter(u => u.comfortRating && u.comfortRating >= 4)
+        .map(u => u.machineName);
+      
+      const progressData = equipmentUsage
+        .filter(u => u.maxWeight > 0)
+        .map(u => `- ${u.machineName}: max ${u.maxWeight}kg, avg ${u.avgWeight}kg, used ${u.usageCount}x`);
+
+      usageInsights = `
+User Equipment Usage History (use this for personalization):
+${favoriteEquipment.length > 0 ? `Favorite equipment (prioritize these): ${favoriteEquipment.map(u => u.machineName).join(", ")}` : ""}
+${highComfortEquipment.length > 0 ? `High comfort rating (user feels confident): ${highComfortEquipment.join(", ")}` : ""}
+${progressData.length > 0 ? `\nProgress data for weight suggestions:\n${progressData.join("\n")}` : ""}
+
+IMPORTANT: Use the max/avg weights from usage history to suggest appropriate starting weights. Apply progressive overload (5-10% increase from avg weight where appropriate).
+`;
+    }
 
     const intensityGuide = {
       light: 'Lower weights, higher reps (12-15), longer rest periods (90-120s). Focus on form and endurance.',
@@ -69,10 +107,10 @@ Guidelines:
 - Consider the user's experience level for appropriate intensity
 - Balance muscle groups across the week
 - Include proper rest days on days not in the preferred training days
-- Suggest appropriate sets, reps, and weights based on experience level
+- Suggest appropriate sets, reps, and weights based on experience level AND usage history
 - Consider any injuries or limitations${injuryWarnings}
 - IMPORTANT: Strictly respect the user's time and day preferences${preferenceInstructions}
-
+${usageInsights}
 Always respond with valid JSON matching the exact structure requested.`;
 
     const userPrompt = `Create a weekly workout plan for a user with the following profile:
