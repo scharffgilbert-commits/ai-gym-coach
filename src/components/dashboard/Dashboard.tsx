@@ -8,6 +8,8 @@ import { WaterTracker } from '@/components/water/WaterTracker';
 import { EquipmentStats } from '@/components/equipment/EquipmentStats';
 import { RecoveryRecommendations } from '@/components/recovery/RecoveryRecommendations';
 import { useApp } from '@/contexts/AppContext';
+import { useLanguage } from '@/i18n/LanguageContext';
+
 interface DashboardProps {
   onStartWorkout: () => void;
   onAddEquipment: () => void;
@@ -21,6 +23,7 @@ interface DashboardProps {
 
 export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar, onViewMeasurements, onViewNotifications, onViewHealth }: DashboardProps) {
   const { user, workoutPlans, gyms } = useApp();
+  const { t } = useLanguage();
 
   // Mock data for demo
   const weeklyProgress = 65;
@@ -31,7 +34,7 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
     <div className="min-h-screen pb-24 bg-background">
       <PageHeader
         title={`Hey, ${user?.name?.split(' ')[0] || 'Champion'}!`}
-        subtitle="Ready to crush your workout?"
+        subtitle={t('dashboard_ready')}
       />
 
       <div className="px-4 space-y-6">
@@ -44,12 +47,12 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
           <ProgressRing progress={weeklyProgress} size={100} strokeWidth={10}>
             <div className="text-center">
               <span className="text-2xl font-bold text-foreground">{weeklyProgress}%</span>
-              <span className="block text-xs text-muted-foreground">Weekly</span>
+              <span className="block text-xs text-muted-foreground">{t('dashboard_weekly')}</span>
             </div>
           </ProgressRing>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-foreground">Weekly Progress</h3>
-            <p className="text-sm text-muted-foreground">3 of 4 workouts complete</p>
+            <h3 className="text-lg font-semibold text-foreground">{t('dashboard_weekly_progress')}</h3>
+            <p className="text-sm text-muted-foreground">3 of 4 {t('dashboard_workouts_complete')}</p>
             <div className="mt-3 flex gap-2">
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
                 <div
@@ -80,13 +83,13 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
           <div className="absolute right-4 bottom-0 -mb-6 h-24 w-24 rounded-full bg-foreground/5" />
           
           <div className="relative z-10">
-            <h2 className="text-2xl font-bold text-primary-foreground">Today's Workout</h2>
+            <h2 className="text-2xl font-bold text-primary-foreground">{t('dashboard_todays_workout')}</h2>
             {hasEquipment ? (
               <>
                 <p className="mt-1 text-primary-foreground/80">
                   {todaysPlan.length > 0
-                    ? `${todaysPlan.length} exercises • ~45 min`
-                    : 'Rest day - but you can still train!'}
+                    ? `${todaysPlan.length} ${t('plan_exercises')} • ~45 min`
+                    : t('dashboard_rest_day')}
                 </p>
                 <Button
                   variant="glass"
@@ -95,13 +98,13 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                   onClick={onStartWorkout}
                 >
                   <Play className="h-5 w-5" />
-                  Start Workout
+                  {t('workout_start')}
                 </Button>
               </>
             ) : (
               <>
                 <p className="mt-1 text-primary-foreground/80">
-                  Add your gym equipment to get AI-generated plans
+                  {t('dashboard_add_equipment_hint')}
                 </p>
                 <Button
                   variant="glass"
@@ -110,7 +113,7 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                   onClick={onAddEquipment}
                 >
                   <Plus className="h-5 w-5" />
-                  Add Equipment
+                  {t('equipment_add')}
                 </Button>
               </>
             )}
@@ -121,18 +124,18 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
         <div className="grid grid-cols-2 gap-4">
           <StatCard
             icon={Flame}
-            label="Streak"
+            label={t('dashboard_streak')}
             value="12"
-            subValue="days"
+            subValue={t('dashboard_days')}
             trend="up"
             trendValue="+5"
             delay={0.2}
           />
           <StatCard
             icon={TrendingUp}
-            label="This Week"
+            label={t('this_week')}
             value="2,450"
-            subValue="kg lifted"
+            subValue={t('dashboard_kg_lifted')}
             trend="up"
             trendValue="+12%"
             delay={0.25}
@@ -153,6 +156,7 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
 
         {/* Recovery Recommendations */}
         <RecoveryRecommendations />
+        
         {/* Achievements Quick View */}
         {onViewAchievements && (
           <motion.div
@@ -168,8 +172,8 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                   <Trophy className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Achievements</p>
-                  <p className="text-sm text-muted-foreground">Sammle Badges und Meilensteine</p>
+                  <p className="font-semibold text-foreground">{t('achievements_title')}</p>
+                  <p className="text-sm text-muted-foreground">{t('dashboard_collect_badges')}</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
@@ -192,8 +196,8 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                   <Apple className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Ernährung</p>
-                  <p className="text-sm text-muted-foreground">Kalorien & Makros tracken</p>
+                  <p className="font-semibold text-foreground">{t('nutrition_title')}</p>
+                  <p className="text-sm text-muted-foreground">{t('dashboard_track_macros')}</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
@@ -216,8 +220,8 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                   <Calendar className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Workout Kalender</p>
-                  <p className="text-sm text-muted-foreground">Streak & Trainingsübersicht</p>
+                  <p className="font-semibold text-foreground">{t('nav_calendar')}</p>
+                  <p className="text-sm text-muted-foreground">{t('dashboard_streak_overview')}</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
@@ -240,8 +244,8 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                   <Ruler className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Körpermaße</p>
-                  <p className="text-sm text-muted-foreground">Fortschritt über Zeit tracken</p>
+                  <p className="font-semibold text-foreground">{t('measurements_title')}</p>
+                  <p className="text-sm text-muted-foreground">{t('dashboard_track_progress')}</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
@@ -264,8 +268,8 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                   <Bell className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Benachrichtigungen</p>
-                  <p className="text-sm text-muted-foreground">Erinnerungen konfigurieren</p>
+                  <p className="font-semibold text-foreground">{t('settings_notifications')}</p>
+                  <p className="text-sm text-muted-foreground">{t('dashboard_configure_reminders')}</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
@@ -288,8 +292,8 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                   <Watch className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Health Daten</p>
-                  <p className="text-sm text-muted-foreground">Wearable & Fitness Tracking</p>
+                  <p className="font-semibold text-foreground">{t('health_title')}</p>
+                  <p className="text-sm text-muted-foreground">{t('dashboard_wearable_tracking')}</p>
                 </div>
               </div>
               <div className="text-primary">→</div>
@@ -304,7 +308,7 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <h3 className="mb-4 text-lg font-semibold text-foreground">Today's Exercises</h3>
+            <h3 className="mb-4 text-lg font-semibold text-foreground">{t('dashboard_todays_exercises')}</h3>
             <div className="space-y-3">
               {todaysPlan.slice(0, 3).map((exercise, i) => (
                 <div
@@ -317,7 +321,7 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{exercise.machineName}</p>
                     <p className="text-sm text-muted-foreground">
-                      {exercise.sets} sets × {exercise.targetReps} reps @ {exercise.targetWeight}kg
+                      {exercise.sets} {t('workout_sets')} × {exercise.targetReps} {t('workout_reps')} @ {exercise.targetWeight}kg
                     </p>
                   </div>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -328,7 +332,7 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
               ))}
               {todaysPlan.length > 3 && (
                 <p className="text-center text-sm text-muted-foreground">
-                  +{todaysPlan.length - 3} more exercises
+                  +{todaysPlan.length - 3} {t('dashboard_more_exercises')}
                 </p>
               )}
             </div>
@@ -349,7 +353,7 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
             onClick={onAddEquipment}
           >
             <Plus className="h-6 w-6 text-primary" />
-            <span>Add Machine</span>
+            <span>{t('dashboard_add_machine')}</span>
           </Button>
           <Button
             variant="outline"
@@ -358,7 +362,7 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
             onClick={onStartWorkout}
           >
             <Dumbbell className="h-6 w-6 text-primary" />
-            <span>Quick Workout</span>
+            <span>{t('dashboard_quick_workout')}</span>
           </Button>
         </motion.div>
       </div>

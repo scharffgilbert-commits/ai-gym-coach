@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, SkipForward, Check, X, ChevronRight, Timer, Dumbbell, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PlannedExercise, CompletedSet } from '@/types/fitness';
 import { useWorkoutProgress } from '@/hooks/useWorkoutProgress';
 import { useAchievements } from '@/hooks/useAchievements';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface WorkoutSessionProps {
   onComplete: () => void;
@@ -70,6 +71,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
   const { user: authUser } = useAuth();
   const { saveWorkoutSession } = useWorkoutProgress(authUser?.id);
   const { checkWorkoutAchievements } = useAchievements();
+  const { t } = useLanguage();
   
   const [exercises] = useState<PlannedExercise[]>(() => {
     // Use provided exercises first
@@ -117,9 +119,9 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Dumbbell className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No exercises available</p>
+          <p className="text-muted-foreground">{t('workout_no_exercises')}</p>
           <Button variant="outline" className="mt-4" onClick={onExit}>
-            Go Back
+            {t('workout_go_back')}
           </Button>
         </div>
       </div>
@@ -240,7 +242,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
                 <X className="h-6 w-6" />
               </button>
               <span className="text-sm font-medium text-muted-foreground">
-                Exercise {currentExerciseIndex + 1} of {totalExercises}
+                {t('workout_exercise_of').replace('{current}', String(currentExerciseIndex + 1)).replace('{total}', String(totalExercises))}
               </span>
               <span className="text-sm text-muted-foreground">{formatTime(workoutDuration)}</span>
             </div>
@@ -256,7 +258,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
               </motion.div>
               <h2 className="text-2xl font-bold text-foreground">{currentExercise.machineName}</h2>
               <p className="mt-2 text-muted-foreground">
-                Set {currentSetNumber} of {currentExercise.sets}
+                {t('workout_set_of').replace('{current}', String(currentSetNumber)).replace('{total}', String(currentExercise.sets))}
               </p>
             </div>
 
@@ -280,7 +282,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
             <div className="mt-12 grid grid-cols-2 gap-6">
               {/* Reps */}
               <div className="fitness-card text-center">
-                <p className="text-sm font-medium text-muted-foreground">REPS</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('workout_reps').toUpperCase()}</p>
                 <div className="mt-2 flex items-center justify-center gap-4">
                   <button
                     onClick={() => adjustValue('reps', 'down')}
@@ -296,12 +298,12 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
                     +
                   </button>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">Target: {currentExercise.targetReps}</p>
+                <p className="mt-2 text-xs text-muted-foreground">{t('workout_target')}: {currentExercise.targetReps}</p>
               </div>
 
               {/* Weight */}
               <div className="fitness-card text-center">
-                <p className="text-sm font-medium text-muted-foreground">WEIGHT (kg)</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('workout_weight').toUpperCase()} (kg)</p>
                 <div className="mt-2 flex items-center justify-center gap-4">
                   <button
                     onClick={() => adjustValue('weight', 'down')}
@@ -317,7 +319,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
                     +
                   </button>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">Target: {currentExercise.targetWeight}kg</p>
+                <p className="mt-2 text-xs text-muted-foreground">{t('workout_target')}: {currentExercise.targetWeight}kg</p>
               </div>
             </div>
 
@@ -325,7 +327,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
             <div className="mt-auto">
               <Button variant="hero" size="xl" className="w-full" onClick={handleSetComplete}>
                 <Check className="h-5 w-5" />
-                Complete Set
+                {t('workout_complete_set')}
               </Button>
             </div>
           </motion.div>
@@ -340,7 +342,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
             exit={{ opacity: 0 }}
             className="flex min-h-screen flex-col items-center justify-center px-4"
           >
-            <h2 className="mb-8 text-2xl font-bold text-foreground">Rest Time</h2>
+            <h2 className="mb-8 text-2xl font-bold text-foreground">{t('workout_rest_time')}</h2>
             
             <ProgressRing
               progress={(restTimeRemaining / currentExercise.restSeconds) * 100}
@@ -358,11 +360,11 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
             <p className="mt-8 text-center text-muted-foreground">
               {currentSetNumber >= currentExercise.sets ? (
                 <>
-                  Next: <span className="font-medium text-foreground">{exercises[currentExerciseIndex + 1]?.machineName}</span>
+                  {t('workout_next')}: <span className="font-medium text-foreground">{exercises[currentExerciseIndex + 1]?.machineName}</span>
                 </>
               ) : (
                 <>
-                  Set {currentSetNumber + 1} of {currentExercise.sets}
+                  {t('workout_set_of').replace('{current}', String(currentSetNumber + 1)).replace('{total}', String(currentExercise.sets))}
                 </>
               )}
             </p>
@@ -374,11 +376,11 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
                 onClick={() => setIsTimerPaused(!isTimerPaused)}
               >
                 {isTimerPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
-                {isTimerPaused ? 'Resume' : 'Pause'}
+                {isTimerPaused ? t('workout_resume') : t('workout_pause')}
               </Button>
               <Button variant="hero" size="lg" onClick={handleSkipRest}>
                 <SkipForward className="h-5 w-5" />
-                Skip Rest
+                {t('workout_skip_rest')}
               </Button>
             </div>
           </motion.div>
@@ -402,35 +404,35 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
               <Check className="h-12 w-12 text-success" />
             </motion.div>
             
-            <h2 className="mt-8 text-3xl font-bold text-foreground">Workout Complete!</h2>
-            <p className="mt-2 text-muted-foreground">Great work today</p>
+            <h2 className="mt-8 text-3xl font-bold text-foreground">{t('workout_complete')}</h2>
+            <p className="mt-2 text-muted-foreground">{t('workout_great_work')}</p>
 
             <div className="mt-8 grid w-full max-w-sm grid-cols-2 gap-4">
               <div className="fitness-card text-center">
                 <Timer className="mx-auto h-6 w-6 text-primary" />
                 <p className="mt-2 text-2xl font-bold text-foreground">{formatTime(workoutDuration)}</p>
-                <p className="text-sm text-muted-foreground">Duration</p>
+                <p className="text-sm text-muted-foreground">{t('workout_duration')}</p>
               </div>
               <div className="fitness-card text-center">
                 <Dumbbell className="mx-auto h-6 w-6 text-primary" />
                 <p className="mt-2 text-2xl font-bold text-foreground">
                   {Object.values(completedSets).reduce((acc, sets) => acc + sets.length, 0)}
                 </p>
-                <p className="text-sm text-muted-foreground">Total Sets</p>
+                <p className="text-sm text-muted-foreground">{t('workout_total_sets')}</p>
               </div>
             </div>
 
             <div className="mt-8 w-full max-w-sm space-y-4">
               <div className="rounded-2xl bg-card p-4 shadow-card">
-                <h4 className="font-medium text-foreground">Exercises Completed</h4>
+                <h4 className="font-medium text-foreground">{t('workout_exercises_completed')}</h4>
                 <div className="mt-3 space-y-2">
-                  {exercises.map((exercise, i) => (
+                  {exercises.map((exercise) => (
                     <div key={exercise.id} className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/20 text-success">
                         <Check className="h-4 w-4" />
                       </div>
                       <span className="flex-1 text-sm text-foreground">{exercise.machineName}</span>
-                      <span className="text-sm text-muted-foreground">{exercise.sets} sets</span>
+                      <span className="text-sm text-muted-foreground">{exercise.sets} {t('workout_sets')}</span>
                     </div>
                   ))}
                 </div>
@@ -466,11 +468,11 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
                 {isSaving ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    Saving...
+                    {t('workout_saving')}
                   </>
                 ) : (
                   <>
-                    Finish
+                    {t('workout_finish')}
                     <ChevronRight className="h-5 w-5" />
                   </>
                 )}
