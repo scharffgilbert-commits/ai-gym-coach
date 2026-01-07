@@ -5,8 +5,8 @@ import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { WaterTracker } from '@/components/water/WaterTracker';
+import { EquipmentStats } from '@/components/equipment/EquipmentStats';
 import { useApp } from '@/contexts/AppContext';
-
 interface DashboardProps {
   onStartWorkout: () => void;
   onAddEquipment: () => void;
@@ -145,6 +145,9 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
         >
           <WaterTracker compact />
         </motion.div>
+
+        {/* Equipment Stats */}
+        <EquipmentStats />
 
         {/* Achievements Quick View */}
         {onViewAchievements && (
