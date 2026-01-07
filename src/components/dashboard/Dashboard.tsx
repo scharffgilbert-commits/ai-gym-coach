@@ -6,6 +6,7 @@ import { ProgressRing } from '@/components/ui/ProgressRing';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { WaterTracker } from '@/components/water/WaterTracker';
 import { EquipmentStats } from '@/components/equipment/EquipmentStats';
+import { RecoveryRecommendations } from '@/components/recovery/RecoveryRecommendations';
 import { useApp } from '@/contexts/AppContext';
 interface DashboardProps {
   onStartWorkout: () => void;
@@ -149,6 +150,8 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
         {/* Equipment Stats */}
         <EquipmentStats />
 
+        {/* Recovery Recommendations */}
+        <RecoveryRecommendations />
         {/* Achievements Quick View */}
         {onViewAchievements && (
           <motion.div
