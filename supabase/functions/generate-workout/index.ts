@@ -21,6 +21,12 @@ interface WorkoutRequest {
     gender: string;
     injuries: { area: string; severity: string }[];
   };
+  preferences?: {
+    minutesPerWorkout: number;
+    workoutsPerWeek: number;
+    preferredDays: string[];
+    intensity: 'light' | 'moderate' | 'intense';
+  };
 }
 
 serve(async (req) => {
@@ -29,7 +35,7 @@ serve(async (req) => {
   }
 
   try {
-    const { goals, equipment, healthProfile } = await req.json() as WorkoutRequest;
+    const { goals, equipment, healthProfile, preferences } = await req.json() as WorkoutRequest;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -42,15 +48,30 @@ serve(async (req) => {
       ? `\n\nIMPORTANT - User has injuries to avoid:\n${healthProfile.injuries.map(i => `- ${i.area} (${i.severity})`).join("\n")}`
       : "";
 
+    const intensityGuide = {
+      light: 'Lower weights, higher reps (12-15), longer rest periods (90-120s). Focus on form and endurance.',
+      moderate: 'Balanced approach with moderate weights, 8-12 reps, 60-90s rest. Good muscle stimulation.',
+      intense: 'Higher weights, lower reps (6-8), supersets where possible, 45-60s rest. Maximum muscle engagement.',
+    };
+
+    const preferenceInstructions = preferences ? `
+Training Preferences:
+- Time per workout: ${preferences.minutesPerWorkout} minutes (STRICT - plan exercises to fit within this time)
+- Training days per week: ${preferences.workoutsPerWeek}
+- Preferred days: ${preferences.preferredDays.join(', ')} (ONLY schedule workouts on these days, rest days on other days)
+- Intensity level: ${preferences.intensity} - ${intensityGuide[preferences.intensity]}
+` : '';
+
     const systemPrompt = `You are an expert fitness coach and personal trainer AI. Create personalized workout plans that are safe, effective, and progressive.
 
 Guidelines:
 - Create exercises ONLY using the available equipment provided
 - Consider the user's experience level for appropriate intensity
 - Balance muscle groups across the week
-- Include proper rest days
+- Include proper rest days on days not in the preferred training days
 - Suggest appropriate sets, reps, and weights based on experience level
 - Consider any injuries or limitations${injuryWarnings}
+- IMPORTANT: Strictly respect the user's time and day preferences${preferenceInstructions}
 
 Always respond with valid JSON matching the exact structure requested.`;
 

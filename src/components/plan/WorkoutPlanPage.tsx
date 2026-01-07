@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { Sparkles, Play, Clock, Dumbbell, ChevronRight, Loader2, Brain, Pencil } from 'lucide-react';
+import { Sparkles, Play, Clock, Dumbbell, ChevronRight, Loader2, Brain, Pencil, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
 import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { WorkoutGeneratorSettings, GeneratorSettings } from './WorkoutGeneratorSettings';
 
 interface WorkoutPlanPageProps {
   onStartWorkout: () => void;
@@ -14,6 +15,12 @@ interface WorkoutPlanPageProps {
 export function WorkoutPlanPage({ onStartWorkout, onEditPlan }: WorkoutPlanPageProps) {
   const { fitnessGoals, workoutPlans } = useApp();
   const { generateWorkout, isGenerating, generatedPlan } = useWorkoutGeneration();
+  const [showSettings, setShowSettings] = useState(false);
+
+  const handleGenerateWithSettings = async (settings: GeneratorSettings) => {
+    await generateWorkout(settings);
+    setShowSettings(false);
+  };
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const today = days[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
@@ -231,7 +238,7 @@ export function WorkoutPlanPage({ onStartWorkout, onEditPlan }: WorkoutPlanPageP
             variant={hasAnyExercises ? "outline" : "default"} 
             size="lg" 
             className="w-full"
-            onClick={generateWorkout}
+            onClick={() => setShowSettings(true)}
             disabled={isGenerating}
           >
             {isGenerating ? (
@@ -241,12 +248,20 @@ export function WorkoutPlanPage({ onStartWorkout, onEditPlan }: WorkoutPlanPageP
               </>
             ) : (
               <>
-                <Sparkles className="h-5 w-5" />
+                <Settings className="h-5 w-5" />
                 {hasAnyExercises ? 'Regenerate Plan' : 'Generate AI Plan'}
               </>
             )}
           </Button>
         </motion.div>
+
+        {/* Generator Settings Dialog */}
+        <WorkoutGeneratorSettings
+          open={showSettings}
+          onOpenChange={setShowSettings}
+          onGenerate={handleGenerateWithSettings}
+          isGenerating={isGenerating}
+        />
 
         {/* AI Tips */}
         {generatedPlan?.tips && generatedPlan.tips.length > 0 && (
