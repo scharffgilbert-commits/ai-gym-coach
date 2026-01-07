@@ -344,6 +344,45 @@ export type Database = {
           },
         ]
       }
+      health_data: {
+        Row: {
+          created_at: string
+          data_type: string
+          id: string
+          metadata: Json | null
+          recorded_at: string
+          source: string
+          synced_at: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          data_type: string
+          id?: string
+          metadata?: Json | null
+          recorded_at: string
+          source: string
+          synced_at?: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          id?: string
+          metadata?: Json | null
+          recorded_at?: string
+          source?: string
+          synced_at?: string
+          unit?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
+      }
       health_profiles: {
         Row: {
           age: number | null

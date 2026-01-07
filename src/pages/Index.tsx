@@ -20,6 +20,7 @@ import { NutritionPage } from '@/components/nutrition/NutritionPage';
 import { CalendarPage } from '@/components/calendar/CalendarPage';
 import { MeasurementsPage } from '@/components/measurements/MeasurementsPage';
 import { NotificationSettings } from '@/components/notifications/NotificationSettings';
+import { HealthDataPage } from '@/components/health/HealthDataPage';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Loader2 } from 'lucide-react';
 import { PlannedExercise } from '@/types/fitness';
@@ -40,7 +41,8 @@ type AppScreen =
   | 'nutrition'
   | 'calendar'
   | 'measurements'
-  | 'notifications';
+  | 'notifications'
+  | 'health';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -117,6 +119,7 @@ function AppContent() {
       calendar: '/calendar',
       measurements: '/measurements',
       notifications: '/notifications',
+      health: '/health',
     };
     return paths[screen];
   };
@@ -162,6 +165,7 @@ function AppContent() {
             onViewCalendar={() => setCurrentScreen('calendar')}
             onViewMeasurements={() => setCurrentScreen('measurements')}
             onViewNotifications={() => setCurrentScreen('notifications')}
+            onViewHealth={() => setCurrentScreen('health')}
           />
         )}
 
@@ -255,6 +259,10 @@ function AppContent() {
 
         {currentScreen === 'notifications' && (
           <NotificationSettings key="notifications" onBack={() => setCurrentScreen('dashboard')} />
+        )}
+
+        {currentScreen === 'health' && (
+          <HealthDataPage key="health" />
         )}
       </AnimatePresence>
 
