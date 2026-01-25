@@ -22,6 +22,7 @@ import { MeasurementsPage } from '@/components/measurements/MeasurementsPage';
 import { NotificationSettings } from '@/components/notifications/NotificationSettings';
 import { HealthDataPage } from '@/components/health/HealthDataPage';
 import { TrainingDiary } from '@/components/diary/TrainingDiary';
+import { AIChatBubble } from '@/components/chat/AIChatBubble';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Loader2 } from 'lucide-react';
 import { PlannedExercise } from '@/types/fitness';
@@ -148,6 +149,8 @@ function AppContent() {
     setSelectedExercises(exercises);
     setCurrentScreen('workout');
   };
+
+  const showChatBubble = !['onboarding', 'workout'].includes(currentScreen) && user?.onboardingComplete;
 
   return (
     <div className="min-h-screen bg-background">
@@ -277,6 +280,9 @@ function AppContent() {
           onNavigate={handleNavigate}
         />
       )}
+
+      {/* AI Chat Bubble - always visible after onboarding */}
+      {showChatBubble && <AIChatBubble />}
     </div>
   );
 }

@@ -253,6 +253,13 @@ export const translations = {
     diary_deleteConfirmDescription: "Dieser Eintrag wird dauerhaft gelöscht.",
     clear_filter: "Filter löschen",
     error: "Fehler",
+    
+    // AI Chat
+    chat_title: "FitAI Coach",
+    chat_online: "Online & bereit zu helfen",
+    chat_clear: "Verlauf löschen",
+    chat_welcome: "Hallo! Ich bin dein AI Fitness Coach. Frag mich alles über Training, Ernährung oder Motivation! 💪",
+    chat_placeholder: "Nachricht eingeben...",
   },
   
   en: {
@@ -509,6 +516,13 @@ export const translations = {
     diary_deleteConfirmDescription: "This entry will be permanently deleted.",
     clear_filter: "Clear filter",
     error: "Error",
+    
+    // AI Chat
+    chat_title: "FitAI Coach",
+    chat_online: "Online & ready to help",
+    chat_clear: "Clear history",
+    chat_welcome: "Hi! I'm your AI Fitness Coach. Ask me anything about training, nutrition or motivation! 💪",
+    chat_placeholder: "Type a message...",
   },
   
   es: {
@@ -765,6 +779,13 @@ export const translations = {
     diary_deleteConfirmDescription: "Esta entrada se eliminará permanentemente.",
     clear_filter: "Limpiar filtro",
     error: "Error",
+    
+    // AI Chat
+    chat_title: "FitAI Coach",
+    chat_online: "Online y listo para ayudar",
+    chat_clear: "Borrar historial",
+    chat_welcome: "¡Hola! Soy tu Coach de Fitness AI. ¡Pregúntame sobre entrenamiento, nutrición o motivación! 💪",
+    chat_placeholder: "Escribe un mensaje...",
   },
   
   fr: {
@@ -1020,6 +1041,13 @@ export const translations = {
     diary_deleteConfirmDescription: "Cette entrée sera supprimée définitivement.",
     clear_filter: "Effacer filtre",
     error: "Erreur",
+    
+    // AI Chat
+    chat_title: "FitAI Coach",
+    chat_online: "En ligne et prêt à aider",
+    chat_clear: "Effacer l'historique",
+    chat_welcome: "Salut! Je suis ton Coach Fitness AI. Demande-moi tout sur l'entraînement, la nutrition ou la motivation! 💪",
+    chat_placeholder: "Écris un message...",
   },
   
   it: {
@@ -1276,6 +1304,13 @@ export const translations = {
     diary_deleteConfirmDescription: "Questa voce verrà eliminata.",
     clear_filter: "Cancella filtro",
     error: "Errore",
+    
+    // AI Chat
+    chat_title: "FitAI Coach",
+    chat_online: "Online e pronto ad aiutare",
+    chat_clear: "Cancella cronologia",
+    chat_welcome: "Ciao! Sono il tuo Coach Fitness AI. Chiedimi di allenamento, nutrizione o motivazione! 💪",
+    chat_placeholder: "Scrivi un messaggio...",
   },
   
   pt: {
@@ -1532,6 +1567,13 @@ export const translations = {
     clear_filter: "Limpar filtro",
     error: "Erro",
     dashboard_track_wellbeing: "Acompanhe bem-estar e progresso",
+    
+    // AI Chat
+    chat_title: "FitAI Coach",
+    chat_online: "Online e pronto para ajudar",
+    chat_clear: "Limpar histórico",
+    chat_welcome: "Olá! Sou seu Coach de Fitness AI. Pergunte-me sobre treino, nutrição ou motivação! 💪",
+    chat_placeholder: "Digite uma mensagem...",
   },
 } as const;
 
