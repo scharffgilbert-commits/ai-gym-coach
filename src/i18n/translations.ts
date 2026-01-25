@@ -1,3 +1,4 @@
+// Translations for multi-language support
 export const translations = {
   de: {
     // Common
@@ -857,6 +858,10 @@ export const translations = {
     cycle_setup_hint: "Activa el seguimiento para obtener recomendaciones personalizadas",
     cycle_setup: "Configurar ahora",
     cycle_privacy_note: "Tus datos son privados y se almacenan de forma segura.",
+    
+    // Voice Mode
+    voice_mode_active: "Control por voz activo",
+    voice_mode_inactive: "Activar control por voz",
   },
   
   fr: {
@@ -1140,6 +1145,10 @@ export const translations = {
     cycle_setup_hint: "Active le suivi pour des recommandations personnalisées",
     cycle_setup: "Configurer",
     cycle_privacy_note: "Tes données restent privées et sont stockées en sécurité.",
+    
+    // Voice Mode
+    voice_mode_active: "Contrôle vocal actif",
+    voice_mode_inactive: "Activer le contrôle vocal",
   },
   
   it: {
@@ -1424,6 +1433,10 @@ export const translations = {
     cycle_setup_hint: "Attiva il monitoraggio per raccomandazioni personalizzate",
     cycle_setup: "Configura ora",
     cycle_privacy_note: "I tuoi dati restano privati e sono archiviati in sicurezza.",
+    
+    // Voice Mode
+    voice_mode_active: "Controllo vocale attivo",
+    voice_mode_inactive: "Attiva controllo vocale",
   },
   
   pt: {
@@ -1708,6 +1721,10 @@ export const translations = {
     cycle_setup_hint: "Ative o rastreamento para recomendações personalizadas",
     cycle_setup: "Configurar agora",
     cycle_privacy_note: "Seus dados são privados e armazenados com segurança.",
+    
+    // Voice Mode
+    voice_mode_active: "Controle por voz ativo",
+    voice_mode_inactive: "Ativar controle por voz",
   },
 } as const;
 

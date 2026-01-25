@@ -99,7 +99,7 @@ export function VoiceModeToggle({
           </motion.div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{isActive ? t('voice_mode_active') : t('voice_mode_inactive')}</p>
+          <p>{isActive ? t('voice_mode_active' as keyof typeof import('@/i18n/translations').translations.de) : t('voice_mode_inactive' as keyof typeof import('@/i18n/translations').translations.de)}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
