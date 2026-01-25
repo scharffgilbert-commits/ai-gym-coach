@@ -35,7 +35,7 @@ export function useAchievements() {
         .select('id')
         .eq('user_id', user.id)
         .eq('achievement_id', achievement.id)
-        .single();
+        .maybeSingle();
 
       if (existing) return false; // Already unlocked
 

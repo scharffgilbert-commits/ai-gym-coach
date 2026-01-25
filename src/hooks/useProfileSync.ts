@@ -78,7 +78,7 @@ export function useProfileSync() {
         .from('health_profiles')
         .select('*')
         .eq('user_id', authUser.id)
-        .single();
+        .maybeSingle();
 
       if (healthData) {
         setHealthProfile({
@@ -100,7 +100,7 @@ export function useProfileSync() {
         .from('fitness_goals')
         .select('*')
         .eq('user_id', authUser.id)
-        .single();
+        .maybeSingle();
 
       if (goalsData) {
         setFitnessGoals({
@@ -155,7 +155,7 @@ export function useProfileSync() {
       .from('health_profiles')
       .select('id')
       .eq('user_id', authUser.id)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       const { error } = await supabase
@@ -210,7 +210,7 @@ export function useProfileSync() {
       .from('fitness_goals')
       .select('id')
       .eq('user_id', authUser.id)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       const { error } = await supabase

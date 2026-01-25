@@ -44,7 +44,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           .from('profiles')
           .select('language')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
         
         if (profile?.language && profile.language in translations) {
           setLanguageState(profile.language as Language);
@@ -64,7 +64,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           .from('profiles')
           .select('language')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
         
         if (profile?.language && profile.language in translations) {
           setLanguageState(profile.language as Language);
