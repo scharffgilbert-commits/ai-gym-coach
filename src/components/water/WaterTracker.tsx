@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAchievements } from '@/hooks/useAchievements';
+import { useLanguage } from '@/i18n/LanguageContext';
 import { toast } from 'sonner';
 
 interface WaterEntry {
@@ -20,6 +21,7 @@ interface WaterTrackerProps {
 export function WaterTracker({ compact = false }: WaterTrackerProps) {
   const { user } = useAuth();
   const { checkWaterAchievements } = useAchievements();
+  const { t } = useLanguage();
   const [entries, setEntries] = useState<WaterEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAmount, setSelectedAmount] = useState(250);
@@ -70,7 +72,7 @@ export function WaterTracker({ compact = false }: WaterTrackerProps) {
       .single();
 
     if (error) {
-      toast.error('Fehler beim Speichern');
+      toast.error(t('error_saving'));
       return;
     }
 
@@ -78,12 +80,12 @@ export function WaterTracker({ compact = false }: WaterTrackerProps) {
     
     const newTotal = totalToday + amount;
     if (newTotal >= dailyGoal && totalToday < dailyGoal) {
-      toast.success('🎉 Tagesziel erreicht!', {
-        description: 'Du hast dein Wasserziel für heute erreicht!',
+      toast.success(`🎉 ${t('water_goal_reached')}`, {
+        description: t('water_goal_description'),
       });
       checkWaterAchievements();
     } else {
-      toast.success(`+${amount}ml hinzugefügt`);
+      toast.success(`+${amount}ml ${t('water_added')}`);
     }
   };
 
@@ -94,7 +96,7 @@ export function WaterTracker({ compact = false }: WaterTrackerProps) {
       .eq('id', id);
 
     if (error) {
-      toast.error('Fehler beim Löschen');
+      toast.error(t('error_deleting'));
       return;
     }
 
@@ -114,7 +116,7 @@ export function WaterTracker({ compact = false }: WaterTrackerProps) {
               <Droplet className="h-6 w-6 text-blue-500" />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Wasser heute</p>
+              <p className="text-sm font-medium text-muted-foreground">{t('water_today')}</p>
               <p className="text-xl font-bold text-foreground">
                 {(totalToday / 1000).toFixed(1)}L <span className="text-sm font-normal text-muted-foreground">/ {dailyGoal / 1000}L</span>
               </p>
@@ -189,7 +191,7 @@ export function WaterTracker({ compact = false }: WaterTrackerProps) {
             className="mt-4 flex items-center gap-2 rounded-full bg-success/20 px-4 py-2"
           >
             <Target className="h-4 w-4 text-success" />
-            <span className="text-sm font-medium text-success">Tagesziel erreicht!</span>
+            <span className="text-sm font-medium text-success">{t('water_goal_reached')}</span>
           </motion.div>
         )}
       </div>
@@ -240,13 +242,13 @@ export function WaterTracker({ compact = false }: WaterTrackerProps) {
         onClick={() => addWater(selectedAmount)}
       >
         <Droplet className="mr-2 h-5 w-5" />
-        {selectedAmount}ml hinzufügen
+        {selectedAmount}ml {t('water_add_button')}
       </Button>
 
       {/* Today's Entries */}
       {entries.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-muted-foreground">Heute getrunken</h4>
+          <h4 className="text-sm font-medium text-muted-foreground">{t('water_drunk_today')}</h4>
           <AnimatePresence>
             {entries.slice(0, 5).map((entry) => (
               <motion.div

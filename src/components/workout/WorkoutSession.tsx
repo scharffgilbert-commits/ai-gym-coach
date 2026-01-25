@@ -113,6 +113,14 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
     ? ((currentExerciseIndex * 100) + ((currentSetNumber - 1) / currentExercise.sets * 100)) / totalExercises
     : 0;
 
+  // All hooks MUST be called before any conditional returns
+  useEffect(() => {
+    if (currentExercise) {
+      setActualReps(currentExercise.targetReps);
+      setActualWeight(currentExercise.targetWeight);
+    }
+  }, [currentExercise]);
+
   // Show loading or empty state if no exercises
   if (!currentExercise || exercises.length === 0) {
     return (
@@ -127,13 +135,6 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
       </div>
     );
   }
-
-  useEffect(() => {
-    if (currentExercise) {
-      setActualReps(currentExercise.targetReps);
-      setActualWeight(currentExercise.targetWeight);
-    }
-  }, [currentExercise]);
 
   // Rest timer countdown
   useEffect(() => {

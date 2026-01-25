@@ -6,10 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Machine, MachineCategory, MuscleGroup } from '@/types/fitness';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNativeCamera } from '@/hooks/useNativeCamera';
+
 interface AddEquipmentProps {
   onBack: () => void;
   onComplete: () => void;
@@ -19,6 +21,7 @@ type Step = 'capture' | 'analyzing' | 'confirm' | 'details' | 'complete';
 
 export function AddEquipment({ onBack, onComplete }: AddEquipmentProps) {
   const { gyms, addGym, setGyms } = useApp();
+  const { user: authUser } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { takePhoto, pickFromGallery, isNative, isLoading: cameraLoading } = useNativeCamera();
@@ -154,39 +157,94 @@ export function AddEquipment({ onBack, onComplete }: AddEquipmentProps) {
     setStep('details');
   };
 
-  const handleSave = () => {
-    const newMachine: Machine = {
-      id: `machine-${Date.now()}`,
-      gymId: gyms[0]?.id || 'default-gym',
-      name: machineData.name || 'Unknown Machine',
-      category: machineData.category || 'chest',
-      muscleGroups: machineData.muscleGroups || [],
-      manufacturer: machineData.manufacturer,
-      imageUrl: imageUrl || undefined,
-      aiDetected: machineData.aiDetected || false,
-      userConfirmed: true,
-    };
-
-    if (gyms.length === 0) {
-      addGym({
-        id: 'default-gym',
-        name: 'My Gym',
-        userId: 'temp-user',
-        machines: [newMachine],
-        createdAt: new Date(),
+  const handleSave = async () => {
+    if (!authUser?.id) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in to save equipment.',
+        variant: 'destructive',
       });
-    } else {
-      const updatedGyms = [...gyms];
-      updatedGyms[0].machines.push(newMachine);
-      setGyms(updatedGyms);
+      return;
     }
 
-    toast({
-      title: 'Equipment added!',
-      description: `${machineData.name} has been added to your gym.`,
-    });
+    try {
+      // Create or get gym in Supabase
+      let gymId = gyms[0]?.id;
+      
+      if (!gymId || gymId === 'default-gym') {
+        const { data: savedGym, error: gymError } = await supabase
+          .from('gyms')
+          .insert({
+            user_id: authUser.id,
+            name: 'My Gym',
+          })
+          .select()
+          .single();
+        
+        if (gymError) throw gymError;
+        gymId = savedGym.id;
+      }
 
-    setStep('complete');
+      // Save machine to Supabase
+      const { data: savedMachine, error: machineError } = await supabase
+        .from('machines')
+        .insert({
+          user_id: authUser.id,
+          gym_id: gymId,
+          name: machineData.name || 'Unknown Machine',
+          category: machineData.category || 'chest',
+          muscle_groups: machineData.muscleGroups || [],
+          manufacturer: machineData.manufacturer || null,
+          image_url: imageUrl || null,
+          ai_detected: machineData.aiDetected || false,
+          user_confirmed: true,
+        })
+        .select()
+        .single();
+
+      if (machineError) throw machineError;
+
+      // Update local state
+      const newMachine: Machine = {
+        id: savedMachine.id,
+        gymId: gymId,
+        name: savedMachine.name,
+        category: savedMachine.category as MachineCategory || 'chest',
+        muscleGroups: (savedMachine.muscle_groups as MuscleGroup[]) || [],
+        manufacturer: savedMachine.manufacturer || undefined,
+        imageUrl: savedMachine.image_url || undefined,
+        aiDetected: savedMachine.ai_detected || false,
+        userConfirmed: savedMachine.user_confirmed || true,
+      };
+
+      if (gyms.length === 0) {
+        addGym({
+          id: gymId,
+          name: 'My Gym',
+          userId: authUser.id,
+          machines: [newMachine],
+          createdAt: new Date(),
+        });
+      } else {
+        const updatedGyms = [...gyms];
+        updatedGyms[0].machines.push(newMachine);
+        setGyms(updatedGyms);
+      }
+
+      toast({
+        title: 'Equipment added!',
+        description: `${machineData.name} has been added to your gym.`,
+      });
+
+      setStep('complete');
+    } catch (error) {
+      console.error('Error saving equipment:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save equipment. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleAddAnother = () => {
