@@ -19,9 +19,10 @@ interface DashboardProps {
   onViewMeasurements?: () => void;
   onViewNotifications?: () => void;
   onViewHealth?: () => void;
+  onViewDiary?: () => void;
 }
 
-export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar, onViewMeasurements, onViewNotifications, onViewHealth }: DashboardProps) {
+export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar, onViewMeasurements, onViewNotifications, onViewHealth, onViewDiary }: DashboardProps) {
   const { user, workoutPlans, gyms } = useApp();
   const { t } = useLanguage();
 

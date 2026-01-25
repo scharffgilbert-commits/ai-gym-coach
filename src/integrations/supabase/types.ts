@@ -667,6 +667,59 @@ export type Database = {
         }
         Relationships: []
       }
+      training_diary_entries: {
+        Row: {
+          created_at: string
+          energy_level: number | null
+          entry_date: string
+          id: string
+          mood_tags: string[] | null
+          notes: string | null
+          photos: string[] | null
+          session_id: string | null
+          sleep_quality: number | null
+          stress_level: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          energy_level?: number | null
+          entry_date?: string
+          id?: string
+          mood_tags?: string[] | null
+          notes?: string | null
+          photos?: string[] | null
+          session_id?: string | null
+          sleep_quality?: number | null
+          stress_level?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          energy_level?: number | null
+          entry_date?: string
+          id?: string
+          mood_tags?: string[] | null
+          notes?: string | null
+          photos?: string[] | null
+          session_id?: string | null
+          sleep_quality?: number | null
+          stress_level?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_diary_entries_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_history: {
         Row: {
           id: string
