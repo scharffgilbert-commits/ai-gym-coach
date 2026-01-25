@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { User, Settings, Bell, Shield, LogOut, ChevronRight, Moon, Sun, Crown, Target, FileText } from 'lucide-react';
+import { User, Settings, Bell, Shield, LogOut, ChevronRight, Moon, Sun, Crown, Target, FileText, ScrollText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
@@ -44,6 +44,12 @@ export function ProfilePage({ onLogout, onResetProfile }: ProfilePageProps) {
       label: 'Privacy Policy',
       description: 'View our privacy policy',
       action: () => navigate('/privacy'),
+    },
+    {
+      icon: ScrollText,
+      label: 'Terms of Service',
+      description: 'View our terms of service',
+      action: () => navigate('/terms'),
     },
     {
       icon: Shield,
