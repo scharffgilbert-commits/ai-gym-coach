@@ -51,9 +51,10 @@ export function PlanEditor({ planId, onBack, onSave }: PlanEditorProps) {
         .from('workout_plans')
         .select('*')
         .eq('id', planId)
-        .single();
+        .maybeSingle();
 
       if (planError) throw planError;
+      if (!plan) throw new Error('Plan not found');
 
       setPlanName(plan.name);
 
