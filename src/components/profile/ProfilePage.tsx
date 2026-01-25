@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { User, Settings, Bell, Shield, LogOut, ChevronRight, Moon, Sun, Crown, Target } from 'lucide-react';
+import { User, Settings, Bell, Shield, LogOut, ChevronRight, Moon, Sun, Crown, Target, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useApp } from '@/contexts/AppContext';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfilePageProps {
   onLogout: () => void;
@@ -14,6 +15,7 @@ interface ProfilePageProps {
 export function ProfilePage({ onLogout, onResetProfile }: ProfilePageProps) {
   const { user, healthProfile, fitnessGoals, isDarkMode, toggleDarkMode } = useApp();
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const menuItems = [
     {
@@ -36,6 +38,12 @@ export function ProfilePage({ onLogout, onResetProfile }: ProfilePageProps) {
       icon: Bell,
       label: 'Notifications',
       description: 'Manage push notifications',
+    },
+    {
+      icon: FileText,
+      label: 'Privacy Policy',
+      description: 'View our privacy policy',
+      action: () => navigate('/privacy'),
     },
     {
       icon: Shield,
