@@ -121,6 +121,29 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
     }
   }, [currentExercise]);
 
+  // Rest timer countdown - MUST be before conditional returns
+  useEffect(() => {
+    if (phase !== 'rest' || isTimerPaused || restTimeRemaining <= 0 || !currentExercise) return;
+
+    const timer = setInterval(() => {
+      setRestTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // Handle rest complete inline to avoid stale closure
+          if (currentSetNumber >= (currentExercise?.sets || 0)) {
+            setCurrentExerciseIndex(idx => idx + 1);
+            setCurrentSetNumber(1);
+          }
+          setPhase('exercise');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [phase, isTimerPaused, restTimeRemaining, currentExercise, currentSetNumber]);
+
   // Show loading or empty state if no exercises
   if (!currentExercise || exercises.length === 0) {
     return (
@@ -135,24 +158,6 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
       </div>
     );
   }
-
-  // Rest timer countdown
-  useEffect(() => {
-    if (phase !== 'rest' || isTimerPaused || restTimeRemaining <= 0) return;
-
-    const timer = setInterval(() => {
-      setRestTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleRestComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [phase, isTimerPaused, restTimeRemaining]);
 
   const handleSetComplete = () => {
     const newSet: CompletedSet = {
