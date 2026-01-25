@@ -5,7 +5,7 @@ interface VoiceOverlayProps {
   isListening: boolean;
   isSpeaking: boolean;
   transcript: string;
-  status?: 'listening' | 'processing' | 'speaking';
+  status?: 'listening' | 'processing' | 'speaking' | string;
 }
 
 export function VoiceOverlay({ isListening, isSpeaking, transcript, status }: VoiceOverlayProps) {
