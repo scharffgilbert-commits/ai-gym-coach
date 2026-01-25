@@ -21,6 +21,7 @@ import { CalendarPage } from '@/components/calendar/CalendarPage';
 import { MeasurementsPage } from '@/components/measurements/MeasurementsPage';
 import { NotificationSettings } from '@/components/notifications/NotificationSettings';
 import { HealthDataPage } from '@/components/health/HealthDataPage';
+import { TrainingDiary } from '@/components/diary/TrainingDiary';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Loader2 } from 'lucide-react';
 import { PlannedExercise } from '@/types/fitness';
@@ -42,7 +43,8 @@ type AppScreen =
   | 'calendar'
   | 'measurements'
   | 'notifications'
-  | 'health';
+  | 'health'
+  | 'diary';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -120,6 +122,7 @@ function AppContent() {
     measurements: '/measurements',
     notifications: '/notifications',
     health: '/health',
+    diary: '/diary',
   };
 
   const handleEditPlan = (planId: string) => {
@@ -261,6 +264,10 @@ function AppContent() {
 
         {currentScreen === 'health' && (
           <HealthDataPage key="health" />
+        )}
+
+        {currentScreen === 'diary' && (
+          <TrainingDiary key="diary" onBack={() => setCurrentScreen('dashboard')} />
         )}
       </AnimatePresence>
 
