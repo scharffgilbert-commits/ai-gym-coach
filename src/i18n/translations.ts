@@ -100,6 +100,14 @@ export const translations = {
     water_add: "Wasser hinzufügen",
     water_daily_intake: "Heutige Aufnahme",
     water_remaining: "Verbleibend",
+    water_today: "Wasser heute",
+    water_goal_reached: "Tagesziel erreicht!",
+    water_goal_description: "Du hast dein Wasserziel für heute erreicht!",
+    water_added: "hinzugefügt",
+    water_add_button: "hinzufügen",
+    water_drunk_today: "Heute getrunken",
+    error_saving: "Fehler beim Speichern",
+    error_deleting: "Fehler beim Löschen",
     
     // Equipment
     equipment_title: "Meine Geräte",
@@ -307,6 +315,14 @@ export const translations = {
     water_add: "Add Water",
     water_daily_intake: "Today's Intake",
     water_remaining: "Remaining",
+    water_today: "Water today",
+    water_goal_reached: "Daily goal reached!",
+    water_goal_description: "You've reached your water goal for today!",
+    water_added: "added",
+    water_add_button: "add",
+    water_drunk_today: "Drunk today",
+    error_saving: "Error saving",
+    error_deleting: "Error deleting",
     
     // Equipment
     equipment_title: "My Equipment",
@@ -514,7 +530,15 @@ export const translations = {
     water_add: "Añadir agua",
     water_daily_intake: "Consumo de hoy",
     water_remaining: "Restante",
-    
+    water_today: "Agua hoy",
+    water_goal_reached: "¡Meta diaria alcanzada!",
+    water_goal_description: "¡Has alcanzado tu meta de agua para hoy!",
+    water_added: "añadido",
+    water_add_button: "añadir",
+    water_drunk_today: "Bebido hoy",
+    error_saving: "Error al guardar",
+    error_deleting: "Error al eliminar",
+
     // Equipment
     equipment_title: "Mi equipamiento",
     equipment_add: "Añadir equipo",
@@ -721,7 +745,14 @@ export const translations = {
     water_add: "Ajouter de l'eau",
     water_daily_intake: "Consommation du jour",
     water_remaining: "Restant",
-    
+    water_today: "Eau aujourd'hui",
+    water_goal_reached: "Objectif atteint!",
+    water_goal_description: "Vous avez atteint votre objectif d'eau pour aujourd'hui!",
+    water_added: "ajouté",
+    water_add_button: "ajouter",
+    water_drunk_today: "Bu aujourd'hui",
+    error_saving: "Erreur lors de l'enregistrement",
+    error_deleting: "Erreur lors de la suppression",
     // Equipment
     equipment_title: "Mon équipement",
     equipment_add: "Ajouter un équipement",
@@ -928,7 +959,15 @@ export const translations = {
     water_add: "Aggiungi acqua",
     water_daily_intake: "Consumo di oggi",
     water_remaining: "Rimanente",
-    
+    water_today: "Acqua oggi",
+    water_goal_reached: "Obiettivo raggiunto!",
+    water_goal_description: "Hai raggiunto il tuo obiettivo di acqua per oggi!",
+    water_added: "aggiunto",
+    water_add_button: "aggiungi",
+    water_drunk_today: "Bevuto oggi",
+    error_saving: "Errore durante il salvataggio",
+    error_deleting: "Errore durante l'eliminazione",
+
     // Equipment
     equipment_title: "La mia attrezzatura",
     equipment_add: "Aggiungi attrezzatura",
@@ -1135,7 +1174,15 @@ export const translations = {
     water_add: "Adicionar água",
     water_daily_intake: "Consumo de hoje",
     water_remaining: "Restante",
-    
+    water_today: "Água hoje",
+    water_goal_reached: "Meta diária atingida!",
+    water_goal_description: "Você atingiu sua meta de água para hoje!",
+    water_added: "adicionado",
+    water_add_button: "adicionar",
+    water_drunk_today: "Bebido hoje",
+    error_saving: "Erro ao salvar",
+    error_deleting: "Erro ao excluir",
+
     // Equipment
     equipment_title: "Meu equipamento",
     equipment_add: "Adicionar equipamento",

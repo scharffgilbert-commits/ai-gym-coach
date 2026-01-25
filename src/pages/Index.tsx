@@ -101,27 +101,25 @@ function AppContent() {
     return null;
   }
 
-  const getPathFromScreen = (screen: AppScreen): string => {
-    const paths: Record<AppScreen, string> = {
-      onboarding: '/onboarding',
-      dashboard: '/dashboard',
-      equipment: '/equipment',
-      'add-equipment': '/equipment/add',
-      plan: '/plan',
-      'edit-plan': '/plan/edit',
-      'select-workout': '/select-workout',
-      workout: '/workout',
-      progress: '/progress',
-      profile: '/profile',
-      achievements: '/achievements',
-      water: '/water',
-      nutrition: '/nutrition',
-      calendar: '/calendar',
-      measurements: '/measurements',
-      notifications: '/notifications',
-      health: '/health',
-    };
-    return paths[screen];
+  // Map screens to paths for navigation
+  const screenToPath: Record<AppScreen, string> = {
+    onboarding: '/onboarding',
+    dashboard: '/dashboard',
+    equipment: '/equipment',
+    'add-equipment': '/equipment/add',
+    plan: '/plan',
+    'edit-plan': '/plan/edit',
+    'select-workout': '/select-workout',
+    workout: '/workout',
+    progress: '/progress',
+    profile: '/profile',
+    achievements: '/achievements',
+    water: '/water',
+    nutrition: '/nutrition',
+    calendar: '/calendar',
+    measurements: '/measurements',
+    notifications: '/notifications',
+    health: '/health',
   };
 
   const handleEditPlan = (planId: string) => {
@@ -268,7 +266,7 @@ function AppContent() {
 
       {showNav && (
         <MobileNav
-          currentPath={getPathFromScreen(currentScreen)}
+          currentPath={screenToPath[currentScreen]}
           onNavigate={handleNavigate}
         />
       )}
