@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple, Calendar, Ruler, Bell, Watch } from 'lucide-react';
+import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple, Calendar, Ruler, Bell, Watch, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -295,6 +295,30 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
                 <div>
                   <p className="font-semibold text-foreground">{t('health_title')}</p>
                   <p className="text-sm text-muted-foreground">{t('dashboard_wearable_tracking')}</p>
+                </div>
+              </div>
+              <div className="text-primary">→</div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Training Diary Quick View */}
+        {onViewDiary && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+            className="fitness-card cursor-pointer"
+            onClick={onViewDiary}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg">
+                  <BookOpen className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">{t('diary_title')}</p>
+                  <p className="text-sm text-muted-foreground">{t('dashboard_track_wellbeing')}</p>
                 </div>
               </div>
               <div className="text-primary">→</div>

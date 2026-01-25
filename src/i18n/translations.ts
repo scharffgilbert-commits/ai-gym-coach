@@ -193,6 +193,7 @@ export const translations = {
     dashboard_track_progress: "Fortschritt über Zeit tracken",
     dashboard_configure_reminders: "Erinnerungen konfigurieren",
     dashboard_wearable_tracking: "Wearable & Fitness Tracking",
+    dashboard_track_wellbeing: "Wohlbefinden & Fortschritt tracken",
     
     // Workout extras
     workout_exercise_of: "Übung {current} von {total}",
@@ -448,6 +449,7 @@ export const translations = {
     dashboard_track_progress: "Track progress over time",
     dashboard_configure_reminders: "Configure reminders",
     dashboard_wearable_tracking: "Wearable & fitness tracking",
+    dashboard_track_wellbeing: "Track wellbeing & progress",
     
     // Workout extras
     workout_exercise_of: "Exercise {current} of {total}",
@@ -703,6 +705,7 @@ export const translations = {
     dashboard_track_progress: "Sigue tu progreso",
     dashboard_configure_reminders: "Configura recordatorios",
     dashboard_wearable_tracking: "Wearable y seguimiento fitness",
+    dashboard_track_wellbeing: "Sigue tu bienestar y progreso",
     
     // Workout extras
     workout_exercise_of: "Ejercicio {current} de {total}",
@@ -957,6 +960,7 @@ export const translations = {
     dashboard_track_progress: "Suivi des progrès",
     dashboard_configure_reminders: "Configurer rappels",
     dashboard_wearable_tracking: "Wearable et suivi fitness",
+    dashboard_track_wellbeing: "Suivez votre bien-être et progrès",
     
     // Workout extras
     workout_exercise_of: "Exercice {current} sur {total}",
@@ -1212,6 +1216,7 @@ export const translations = {
     dashboard_track_progress: "Traccia i progressi",
     dashboard_configure_reminders: "Configura promemoria",
     dashboard_wearable_tracking: "Wearable e tracking fitness",
+    dashboard_track_wellbeing: "Monitora benessere e progressi",
     
     // Workout extras
     workout_exercise_of: "Esercizio {current} di {total}",
@@ -1486,6 +1491,47 @@ export const translations = {
     // Navigation extras
     nav_home: "Início",
     nav_profile: "Perfil",
+    
+    // Training Diary
+    diary_title: "Diário de Treino",
+    diary_subtitle: "Acompanhe seu bem-estar e progresso",
+    diary_newEntry: "Nova Entrada",
+    diary_editEntry: "Editar Entrada",
+    diary_date: "Data",
+    diary_wellbeing: "Bem-estar",
+    diary_energyLevel: "Nível de Energia",
+    diary_sleepQuality: "Qualidade do Sono",
+    diary_stressLevel: "Nível de Estresse",
+    diary_mood: "Humor",
+    diary_notes: "Notas",
+    diary_notesPlaceholder: "Como foi seu treino hoje? O que funcionou bem?",
+    diary_low: "Baixo",
+    diary_high: "Alto",
+    diary_poor: "Ruim",
+    diary_excellent: "Excelente",
+    diary_relaxed: "Relaxado",
+    diary_stressed: "Estressado",
+    diary_moodMotivated: "Motivado",
+    diary_moodTired: "Cansado",
+    diary_moodStrong: "Forte",
+    diary_moodWeak: "Fraco",
+    diary_moodNeutral: "Neutro",
+    diary_avgEnergy: "Energia Méd",
+    diary_avgSleep: "Sono Méd",
+    diary_avgStress: "Estresse Méd",
+    diary_noEntries: "Nenhuma entrada ainda",
+    diary_createFirst: "Criar primeira entrada",
+    diary_entryCreated: "Entrada criada",
+    diary_entryUpdated: "Entrada atualizada",
+    diary_entryDeleted: "Entrada excluída",
+    diary_loadError: "Erro ao carregar",
+    diary_saveError: "Erro ao salvar",
+    diary_deleteError: "Erro ao excluir",
+    diary_deleteConfirmTitle: "Excluir entrada?",
+    diary_deleteConfirmDescription: "Esta entrada será excluída permanentemente.",
+    clear_filter: "Limpar filtro",
+    error: "Erro",
+    dashboard_track_wellbeing: "Acompanhe bem-estar e progresso",
   },
 } as const;
 
