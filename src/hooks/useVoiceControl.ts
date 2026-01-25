@@ -19,7 +19,7 @@ export function useVoiceControl(options: UseVoiceControlOptions = {}) {
   const [isSupported, setIsSupported] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionType | null>(null);
   const commandsRef = useRef<VoiceCommand[]>([]);
 
   // Check browser support
@@ -174,45 +174,57 @@ export function useVoiceControl(options: UseVoiceControlOptions = {}) {
   };
 }
 
-// Type declarations for Web Speech API
+// Web Speech API type declarations - must be before usage
+interface SpeechRecognitionAlternativeType {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
+interface SpeechRecognitionResultType {
+  readonly length: number;
+  readonly isFinal: boolean;
+  item(index: number): SpeechRecognitionAlternativeType;
+  [index: number]: SpeechRecognitionAlternativeType;
+}
+
+interface SpeechRecognitionResultListType {
+  readonly length: number;
+  item(index: number): SpeechRecognitionResultType;
+  [index: number]: SpeechRecognitionResultType;
+}
+
+interface SpeechRecognitionEventType extends Event {
+  readonly resultIndex: number;
+  readonly results: SpeechRecognitionResultListType;
+}
+
+interface SpeechRecognitionErrorEventType extends Event {
+  readonly error: string;
+  readonly message: string;
+}
+
+interface SpeechRecognitionType extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEventType) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventType) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognitionType;
+  prototype: SpeechRecognitionType;
+}
+
 declare global {
   interface Window {
-    SpeechRecognition: new () => SpeechRecognition;
-    webkitSpeechRecognition: new () => SpeechRecognition;
-  }
-  
-  interface SpeechRecognition extends EventTarget {
-    continuous: boolean;
-    interimResults: boolean;
-    lang: string;
-    onresult: ((event: SpeechRecognitionEvent) => void) | null;
-    onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
-    onend: (() => void) | null;
-    start(): void;
-    stop(): void;
-  }
-  
-  interface SpeechRecognitionEvent {
-    resultIndex: number;
-    results: SpeechRecognitionResultList;
-  }
-  
-  interface SpeechRecognitionResultList {
-    length: number;
-    [index: number]: SpeechRecognitionResult;
-  }
-  
-  interface SpeechRecognitionResult {
-    isFinal: boolean;
-    [index: number]: SpeechRecognitionAlternative;
-  }
-  
-  interface SpeechRecognitionAlternative {
-    transcript: string;
-    confidence: number;
-  }
-  
-  interface SpeechRecognitionErrorEvent {
-    error: string;
+    SpeechRecognition: SpeechRecognitionConstructor;
+    webkitSpeechRecognition: SpeechRecognitionConstructor;
   }
 }
+
+export type { SpeechRecognitionType };
