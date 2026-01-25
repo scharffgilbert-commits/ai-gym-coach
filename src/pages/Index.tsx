@@ -22,6 +22,7 @@ import { MeasurementsPage } from '@/components/measurements/MeasurementsPage';
 import { NotificationSettings } from '@/components/notifications/NotificationSettings';
 import { HealthDataPage } from '@/components/health/HealthDataPage';
 import { TrainingDiary } from '@/components/diary/TrainingDiary';
+import { CyclePage } from '@/components/cycle/CyclePage';
 import { AIChatBubble } from '@/components/chat/AIChatBubble';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Loader2 } from 'lucide-react';
@@ -45,7 +46,8 @@ type AppScreen =
   | 'measurements'
   | 'notifications'
   | 'health'
-  | 'diary';
+  | 'diary'
+  | 'cycle';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -124,6 +126,7 @@ function AppContent() {
     notifications: '/notifications',
     health: '/health',
     diary: '/diary',
+    cycle: '/cycle',
   };
 
   const handleEditPlan = (planId: string) => {
@@ -170,6 +173,7 @@ function AppContent() {
             onViewMeasurements={() => setCurrentScreen('measurements')}
             onViewNotifications={() => setCurrentScreen('notifications')}
             onViewHealth={() => setCurrentScreen('health')}
+            onViewCycle={() => setCurrentScreen('cycle')}
           />
         )}
 
@@ -271,6 +275,10 @@ function AppContent() {
 
         {currentScreen === 'diary' && (
           <TrainingDiary key="diary" onBack={() => setCurrentScreen('dashboard')} />
+        )}
+
+        {currentScreen === 'cycle' && (
+          <CyclePage key="cycle" onBack={() => setCurrentScreen('dashboard')} />
         )}
       </AnimatePresence>
 

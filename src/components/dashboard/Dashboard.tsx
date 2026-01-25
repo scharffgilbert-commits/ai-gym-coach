@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple, Calendar, Ruler, Bell, Watch, BookOpen } from 'lucide-react';
+import { Play, Plus, Flame, TrendingUp, Clock, Dumbbell, Trophy, Apple, Calendar, Ruler, Bell, Watch, BookOpen, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/StatCard';
 import { ProgressRing } from '@/components/ui/ProgressRing';
@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { WaterTracker } from '@/components/water/WaterTracker';
 import { EquipmentStats } from '@/components/equipment/EquipmentStats';
 import { RecoveryRecommendations } from '@/components/recovery/RecoveryRecommendations';
+import { CycleTracker } from '@/components/cycle/CycleTracker';
 import { useApp } from '@/contexts/AppContext';
 import { useLanguage } from '@/i18n/LanguageContext';
 
@@ -20,9 +21,10 @@ interface DashboardProps {
   onViewNotifications?: () => void;
   onViewHealth?: () => void;
   onViewDiary?: () => void;
+  onViewCycle?: () => void;
 }
 
-export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar, onViewMeasurements, onViewNotifications, onViewHealth, onViewDiary }: DashboardProps) {
+export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, onViewNutrition, onViewCalendar, onViewMeasurements, onViewNotifications, onViewHealth, onViewDiary, onViewCycle }: DashboardProps) {
   const { user, workoutPlans, gyms } = useApp();
   const { t } = useLanguage();
 
@@ -157,6 +159,11 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
 
         {/* Recovery Recommendations */}
         <RecoveryRecommendations />
+
+        {/* Cycle Tracker (conditional) */}
+        {onViewCycle && (
+          <CycleTracker compact onOpenDetails={onViewCycle} />
+        )}
         
         {/* Achievements Quick View */}
         {onViewAchievements && (

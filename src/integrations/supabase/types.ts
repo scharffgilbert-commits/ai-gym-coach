@@ -217,6 +217,36 @@ export type Database = {
           },
         ]
       }
+      cycle_logs: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          period_end: string | null
+          period_start: string
+          symptoms: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start: string
+          symptoms?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string
+          symptoms?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       equipment_usage: {
         Row: {
           avg_weight: number | null
@@ -413,7 +443,9 @@ export type Database = {
       health_profiles: {
         Row: {
           age: number | null
+          average_cycle_length: number | null
           created_at: string
+          cycle_tracking_enabled: boolean | null
           gdpr_consent: boolean | null
           gender: string | null
           health_data_consent: boolean | null
@@ -421,6 +453,7 @@ export type Database = {
           id: string
           image_analysis_consent: boolean | null
           injuries: Json | null
+          last_period_start: string | null
           preconditions: Json | null
           updated_at: string
           user_id: string
@@ -428,7 +461,9 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          average_cycle_length?: number | null
           created_at?: string
+          cycle_tracking_enabled?: boolean | null
           gdpr_consent?: boolean | null
           gender?: string | null
           health_data_consent?: boolean | null
@@ -436,6 +471,7 @@ export type Database = {
           id?: string
           image_analysis_consent?: boolean | null
           injuries?: Json | null
+          last_period_start?: string | null
           preconditions?: Json | null
           updated_at?: string
           user_id: string
@@ -443,7 +479,9 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          average_cycle_length?: number | null
           created_at?: string
+          cycle_tracking_enabled?: boolean | null
           gdpr_consent?: boolean | null
           gender?: string | null
           health_data_consent?: boolean | null
@@ -451,6 +489,7 @@ export type Database = {
           id?: string
           image_analysis_consent?: boolean | null
           injuries?: Json | null
+          last_period_start?: string | null
           preconditions?: Json | null
           updated_at?: string
           user_id?: string
