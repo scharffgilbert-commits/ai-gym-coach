@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Check, Loader2, ChevronRight, Plus, Dumbbell, Building2 } from 'lucide-react';
+import { Camera, Check, Loader2, ChevronRight, Plus, Dumbbell, Building2, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { GymChainSelector } from '@/components/gym/GymChainSelector';
 import { toast } from 'sonner';
-
+import { useNativeCamera } from '@/hooks/useNativeCamera';
 interface EquipmentOnboardingProps {
   onComplete: () => void;
   onSkip?: () => void;
@@ -24,6 +24,7 @@ type Step = 'gym-select' | 'intro' | 'capture' | 'analyzing' | 'review';
 export function EquipmentOnboarding({ onComplete, onSkip }: EquipmentOnboardingProps) {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { takePhoto, pickFromGallery, isNative, isLoading: cameraLoading } = useNativeCamera();
   
   const [step, setStep] = useState<Step>('gym-select');
   const [gymId, setGymId] = useState<string | null>(null);
@@ -71,25 +72,13 @@ export function EquipmentOnboarding({ onComplete, onSkip }: EquipmentOnboardingP
     }
   };
 
-  const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const url = URL.createObjectURL(file);
-    setCurrentImage(url);
+  // Shared analysis function
+  const analyzeImage = async (imageBase64: string, previewUrl?: string) => {
+    setCurrentImage(previewUrl || imageBase64);
     setStep('analyzing');
     setIsAnalyzing(true);
 
     try {
-      // Convert to base64
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-      });
-      reader.readAsDataURL(file);
-      const imageBase64 = await base64Promise;
-
       const { data, error } = await supabase.functions.invoke('analyze-equipment', {
         body: { imageBase64 },
       });
@@ -100,7 +89,7 @@ export function EquipmentOnboarding({ onComplete, onSkip }: EquipmentOnboardingP
         name: data.name || 'Unbekanntes Gerät',
         category: data.category || 'functional',
         muscleGroups: data.muscleGroups || [],
-        imageUrl: url,
+        imageUrl: previewUrl || imageBase64,
       };
 
       setMachines(prev => [...prev, newMachine]);
@@ -113,6 +102,44 @@ export function EquipmentOnboarding({ onComplete, onSkip }: EquipmentOnboardingP
     } finally {
       setIsAnalyzing(false);
       setCurrentImage(null);
+    }
+  };
+
+  // Native camera capture
+  const handleNativeCapture = async (source: 'camera' | 'gallery') => {
+    try {
+      const imageBase64 = source === 'camera' ? await takePhoto() : await pickFromGallery();
+      if (imageBase64) {
+        await analyzeImage(imageBase64);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      toast.error('Kamera-Zugriff fehlgeschlagen');
+    }
+  };
+
+  // Web fallback capture
+  const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
+      reader.readAsDataURL(file);
+      const imageBase64 = await base64Promise;
+
+      await analyzeImage(imageBase64, url);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      toast.error('Fehler beim Verarbeiten des Bildes');
+    } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -245,24 +272,55 @@ export function EquipmentOnboarding({ onComplete, onSkip }: EquipmentOnboardingP
               {machines.length} Geräte erfasst
             </p>
 
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="mt-6 flex h-64 cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border bg-card transition-all hover:border-primary"
-            >
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                <Camera className="h-8 w-8 text-primary" />
+            {/* Native Camera Buttons */}
+            {isNative ? (
+              <div className="mt-6 space-y-3">
+                <Button
+                  variant="hero"
+                  size="xl"
+                  className="w-full"
+                  onClick={() => handleNativeCapture('camera')}
+                  disabled={cameraLoading}
+                >
+                  {cameraLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Camera className="h-5 w-5" />
+                  )}
+                  Foto aufnehmen
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => handleNativeCapture('gallery')}
+                  disabled={cameraLoading}
+                >
+                  <Image className="h-5 w-5" />
+                  Aus Galerie wählen
+                </Button>
               </div>
-              <p className="mt-4 font-medium text-foreground">Foto aufnehmen</p>
-              <p className="text-sm text-muted-foreground">oder tippen zum Hochladen</p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={handleImageCapture}
-              />
-            </div>
+            ) : (
+              /* Web Fallback */
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-6 flex h-64 cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border bg-card transition-all hover:border-primary"
+              >
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                  <Camera className="h-8 w-8 text-primary" />
+                </div>
+                <p className="mt-4 font-medium text-foreground">Foto aufnehmen</p>
+                <p className="text-sm text-muted-foreground">oder tippen zum Hochladen</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={handleImageCapture}
+                />
+              </div>
+            )}
 
             {machines.length > 0 && (
               <div className="mt-6 space-y-2">
