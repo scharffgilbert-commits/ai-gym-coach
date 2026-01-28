@@ -126,7 +126,7 @@ export function PlanSelector({ onSelectPlan, onBack }: PlanSelectorProps) {
   };
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader
         title="Select Workout"
         subtitle="Choose a plan or start a quick workout"

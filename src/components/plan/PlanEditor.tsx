@@ -215,7 +215,7 @@ export function PlanEditor({ planId, onBack, onSave }: PlanEditorProps) {
   const currentDay = weeklyPlan[selectedDay];
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader
         title="Edit Plan"
         subtitle="Customize your workout schedule"
