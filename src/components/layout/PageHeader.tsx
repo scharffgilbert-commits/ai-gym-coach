@@ -34,7 +34,7 @@ export function PageHeader({
   };
 
   const handleHome = () => {
-    navigate('/dashboard');
+    navigate('/');
   };
 
   return (
