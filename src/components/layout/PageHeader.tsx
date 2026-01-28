@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
   showBack?: boolean;
+  showHome?: boolean;
   onBack?: () => void;
   rightElement?: React.ReactNode;
   className?: string;
@@ -16,10 +18,25 @@ export function PageHeader({
   title,
   subtitle,
   showBack = false,
+  showHome = true,
   onBack,
   rightElement,
   className,
 }: PageHeaderProps) {
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleHome = () => {
+    navigate('/dashboard');
+  };
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -32,10 +49,20 @@ export function PageHeader({
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={onBack}
+              onClick={handleBack}
               className="shrink-0"
             >
               <ArrowLeft className="h-5 w-5" />
+            </Button>
+          )}
+          {!showBack && showHome && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleHome}
+              className="shrink-0"
+            >
+              <Home className="h-5 w-5" />
             </Button>
           )}
           <div>
