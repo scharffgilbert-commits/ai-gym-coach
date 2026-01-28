@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Set up auth state listener FIRST - this handles all auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -26,10 +26,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN check for existing session
+    // Check for existing session on mount - only set state if session exists
+    // to avoid race condition with onAuthStateChange
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+      if (session) {
+        setSession(session);
+        setUser(session.user);
+      }
       setIsLoading(false);
     });
 

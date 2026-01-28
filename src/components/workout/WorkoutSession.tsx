@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipForward, Check, X, ChevronRight, Timer, Dumbbell, Loader2 } from 'lucide-react';
+import { Play, Pause, SkipForward, Check, X, ChevronRight, Timer, Dumbbell, Loader2, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { useApp } from '@/contexts/AppContext';
@@ -9,6 +9,9 @@ import { PlannedExercise, CompletedSet } from '@/types/fitness';
 import { useWorkoutProgress } from '@/hooks/useWorkoutProgress';
 import { useAchievements } from '@/hooks/useAchievements';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useVoiceControl } from '@/hooks/useVoiceControl';
+import { VoiceOverlay } from '@/components/voice/VoiceOverlay';
+import { WORKOUT_COMMANDS, getLanguageCode } from '@/lib/voiceCommands';
 
 interface WorkoutSessionProps {
   onComplete: () => void;
@@ -71,7 +74,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
   const { user: authUser } = useAuth();
   const { saveWorkoutSession } = useWorkoutProgress(authUser?.id);
   const { checkWorkoutAchievements } = useAchievements();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const [exercises] = useState<PlannedExercise[]>(() => {
     // Use provided exercises first
@@ -106,12 +109,126 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
   const [actualReps, setActualReps] = useState(0);
   const [actualWeight, setActualWeight] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [voiceModeActive, setVoiceModeActive] = useState(false);
+  const [pendingEndWorkout, setPendingEndWorkout] = useState(false);
+  const [pendingVoiceAction, setPendingVoiceAction] = useState<string | null>(null);
+
+  // Voice control handler - sets pending action
+  const handleVoiceCommand = useCallback((action: string) => {
+    switch (action) {
+      case 'COMPLETE_SET':
+        setPendingVoiceAction('COMPLETE_SET');
+        break;
+      case 'PAUSE_WORKOUT':
+        setIsTimerPaused(true);
+        break;
+      case 'RESUME_WORKOUT':
+        setIsTimerPaused(false);
+        break;
+      case 'INCREASE_WEIGHT':
+        setActualWeight(prev => prev + 2.5);
+        break;
+      case 'DECREASE_WEIGHT':
+        setActualWeight(prev => Math.max(0, prev - 2.5));
+        break;
+      case 'SKIP_EXERCISE':
+        setCurrentExerciseIndex(prev => Math.min(prev + 1, exercises.length - 1));
+        setCurrentSetNumber(1);
+        setPhase('exercise');
+        break;
+      case 'END_WORKOUT':
+        setPendingEndWorkout(true);
+        break;
+      case 'CONFIRM':
+        if (pendingEndWorkout) {
+          setPhase('summary');
+          setPendingEndWorkout(false);
+        }
+        break;
+      case 'CANCEL':
+        setPendingEndWorkout(false);
+        break;
+    }
+  }, [exercises.length, pendingEndWorkout]);
+
+  // Initialize voice control
+  const {
+    isListening,
+    isSpeaking,
+    isSupported: voiceSupported,
+    transcript,
+    startListening,
+    stopListening,
+    speak,
+    registerCommands,
+  } = useVoiceControl({
+    language: getLanguageCode(language),
+    onCommand: handleVoiceCommand,
+  });
+
+  // Register voice commands based on language
+  useEffect(() => {
+    const commands = WORKOUT_COMMANDS[language] || WORKOUT_COMMANDS.en;
+    registerCommands(commands);
+  }, [language, registerCommands]);
+
+  // Toggle voice mode
+  const toggleVoiceMode = useCallback(async () => {
+    if (voiceModeActive) {
+      stopListening();
+      setVoiceModeActive(false);
+    } else {
+      const started = await startListening();
+      if (started) {
+        setVoiceModeActive(true);
+        // Announce current exercise
+        const currentEx = exercises[currentExerciseIndex];
+        if (currentEx) {
+          const announcement = language === 'de'
+            ? `${currentEx.machineName}. Satz ${currentSetNumber} von ${currentEx.sets}. ${currentEx.targetReps} Wiederholungen mit ${actualWeight} Kilo.`
+            : `${currentEx.machineName}. Set ${currentSetNumber} of ${currentEx.sets}. ${currentEx.targetReps} reps at ${actualWeight} kilos.`;
+          speak(announcement);
+        }
+      }
+    }
+  }, [voiceModeActive, stopListening, startListening, exercises, currentExerciseIndex, currentSetNumber, actualWeight, language, speak]);
 
   const currentExercise = exercises[currentExerciseIndex];
   const totalExercises = exercises.length;
   const overallProgress = currentExercise && totalExercises > 0
     ? ((currentExerciseIndex * 100) + ((currentSetNumber - 1) / currentExercise.sets * 100)) / totalExercises
     : 0;
+
+  // All hooks MUST be called before any conditional returns
+  useEffect(() => {
+    if (currentExercise) {
+      setActualReps(currentExercise.targetReps);
+      setActualWeight(currentExercise.targetWeight);
+    }
+  }, [currentExercise]);
+
+  // Rest timer countdown - MUST be before conditional returns
+  useEffect(() => {
+    if (phase !== 'rest' || isTimerPaused || restTimeRemaining <= 0 || !currentExercise) return;
+
+    const timer = setInterval(() => {
+      setRestTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // Handle rest complete inline to avoid stale closure
+          if (currentSetNumber >= (currentExercise?.sets || 0)) {
+            setCurrentExerciseIndex(idx => idx + 1);
+            setCurrentSetNumber(1);
+          }
+          setPhase('exercise');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [phase, isTimerPaused, restTimeRemaining, currentExercise, currentSetNumber]);
 
   // Show loading or empty state if no exercises
   if (!currentExercise || exercises.length === 0) {
@@ -128,32 +245,9 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
     );
   }
 
-  useEffect(() => {
-    if (currentExercise) {
-      setActualReps(currentExercise.targetReps);
-      setActualWeight(currentExercise.targetWeight);
-    }
-  }, [currentExercise]);
-
-  // Rest timer countdown
-  useEffect(() => {
-    if (phase !== 'rest' || isTimerPaused || restTimeRemaining <= 0) return;
-
-    const timer = setInterval(() => {
-      setRestTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleRestComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [phase, isTimerPaused, restTimeRemaining]);
-
-  const handleSetComplete = () => {
+  const handleSetComplete = useCallback(() => {
+    if (!currentExercise) return;
+    
     const newSet: CompletedSet = {
       setNumber: currentSetNumber,
       reps: actualReps,
@@ -166,6 +260,19 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
       ...prev,
       [exerciseId]: [...(prev[exerciseId] || []), newSet],
     }));
+
+    // Voice feedback
+    if (voiceModeActive) {
+      const remainingSets = currentExercise.sets - currentSetNumber;
+      const feedback = language === 'de'
+        ? remainingSets > 0 
+          ? `Satz geschafft! Noch ${remainingSets} ${remainingSets === 1 ? 'Satz' : 'Sätze'}.`
+          : 'Übung abgeschlossen! Gut gemacht!'
+        : remainingSets > 0
+          ? `Set complete! ${remainingSets} ${remainingSets === 1 ? 'set' : 'sets'} remaining.`
+          : 'Exercise complete! Great work!';
+      speak(feedback);
+    }
 
     if (currentSetNumber >= currentExercise.sets) {
       // Exercise complete
@@ -183,7 +290,15 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
       setRestTimeRemaining(currentExercise.restSeconds);
       setPhase('rest');
     }
-  };
+  }, [currentExercise, currentSetNumber, actualReps, actualWeight, currentExerciseIndex, exercises.length, voiceModeActive, language, speak]);
+
+  // Handle pending voice actions
+  useEffect(() => {
+    if (pendingVoiceAction === 'COMPLETE_SET' && phase === 'exercise') {
+      handleSetComplete();
+      setPendingVoiceAction(null);
+    }
+  }, [pendingVoiceAction, phase, handleSetComplete]);
 
   const handleRestComplete = () => {
     if (currentSetNumber >= currentExercise.sets) {
@@ -481,6 +596,44 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Voice Mode UI */}
+      {voiceSupported && (
+        <>
+          {/* Voice Toggle Button - Fixed Position */}
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            onClick={toggleVoiceMode}
+            className={`fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all ${
+              voiceModeActive 
+                ? 'gradient-primary shadow-glow' 
+                : 'bg-muted hover:bg-muted/80'
+            }`}
+          >
+            {voiceModeActive ? (
+              <Mic className="h-6 w-6 text-primary-foreground" />
+            ) : (
+              <MicOff className="h-6 w-6 text-muted-foreground" />
+            )}
+            {isListening && (
+              <motion.div
+                className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-success"
+                animate={{ scale: [1, 1.3, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+            )}
+          </motion.button>
+
+          {/* Voice Overlay */}
+          <VoiceOverlay
+            isListening={isListening}
+            isSpeaking={isSpeaking}
+            transcript={transcript}
+            status={pendingEndWorkout ? (language === 'de' ? 'Workout beenden?' : 'End workout?') : undefined}
+          />
+        </>
+      )}
     </div>
   );
 }

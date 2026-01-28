@@ -104,6 +104,33 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          content: string
+          context: Json | null
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       completed_exercises: {
         Row: {
           completed_at: string
@@ -189,6 +216,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cycle_logs: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          period_end: string | null
+          period_start: string
+          symptoms: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start: string
+          symptoms?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string
+          symptoms?: Json | null
+          user_id?: string
+        }
+        Relationships: []
       }
       equipment_usage: {
         Row: {
@@ -386,7 +443,9 @@ export type Database = {
       health_profiles: {
         Row: {
           age: number | null
+          average_cycle_length: number | null
           created_at: string
+          cycle_tracking_enabled: boolean | null
           gdpr_consent: boolean | null
           gender: string | null
           health_data_consent: boolean | null
@@ -394,6 +453,7 @@ export type Database = {
           id: string
           image_analysis_consent: boolean | null
           injuries: Json | null
+          last_period_start: string | null
           preconditions: Json | null
           updated_at: string
           user_id: string
@@ -401,7 +461,9 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          average_cycle_length?: number | null
           created_at?: string
+          cycle_tracking_enabled?: boolean | null
           gdpr_consent?: boolean | null
           gender?: string | null
           health_data_consent?: boolean | null
@@ -409,6 +471,7 @@ export type Database = {
           id?: string
           image_analysis_consent?: boolean | null
           injuries?: Json | null
+          last_period_start?: string | null
           preconditions?: Json | null
           updated_at?: string
           user_id: string
@@ -416,7 +479,9 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          average_cycle_length?: number | null
           created_at?: string
+          cycle_tracking_enabled?: boolean | null
           gdpr_consent?: boolean | null
           gender?: string | null
           health_data_consent?: boolean | null
@@ -424,6 +489,7 @@ export type Database = {
           id?: string
           image_analysis_consent?: boolean | null
           injuries?: Json | null
+          last_period_start?: string | null
           preconditions?: Json | null
           updated_at?: string
           user_id?: string
@@ -666,6 +732,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      training_diary_entries: {
+        Row: {
+          created_at: string
+          energy_level: number | null
+          entry_date: string
+          id: string
+          mood_tags: string[] | null
+          notes: string | null
+          photos: string[] | null
+          session_id: string | null
+          sleep_quality: number | null
+          stress_level: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          energy_level?: number | null
+          entry_date?: string
+          id?: string
+          mood_tags?: string[] | null
+          notes?: string | null
+          photos?: string[] | null
+          session_id?: string | null
+          sleep_quality?: number | null
+          stress_level?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          energy_level?: number | null
+          entry_date?: string
+          id?: string
+          mood_tags?: string[] | null
+          notes?: string | null
+          photos?: string[] | null
+          session_id?: string | null
+          sleep_quality?: number | null
+          stress_level?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_diary_entries_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       training_history: {
         Row: {

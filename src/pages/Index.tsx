@@ -21,6 +21,9 @@ import { CalendarPage } from '@/components/calendar/CalendarPage';
 import { MeasurementsPage } from '@/components/measurements/MeasurementsPage';
 import { NotificationSettings } from '@/components/notifications/NotificationSettings';
 import { HealthDataPage } from '@/components/health/HealthDataPage';
+import { TrainingDiary } from '@/components/diary/TrainingDiary';
+import { CyclePage } from '@/components/cycle/CyclePage';
+import { AIChatBubble } from '@/components/chat/AIChatBubble';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { Loader2 } from 'lucide-react';
 import { PlannedExercise } from '@/types/fitness';
@@ -42,7 +45,9 @@ type AppScreen =
   | 'calendar'
   | 'measurements'
   | 'notifications'
-  | 'health';
+  | 'health'
+  | 'diary'
+  | 'cycle';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -101,27 +106,27 @@ function AppContent() {
     return null;
   }
 
-  const getPathFromScreen = (screen: AppScreen): string => {
-    const paths: Record<AppScreen, string> = {
-      onboarding: '/onboarding',
-      dashboard: '/dashboard',
-      equipment: '/equipment',
-      'add-equipment': '/equipment/add',
-      plan: '/plan',
-      'edit-plan': '/plan/edit',
-      'select-workout': '/select-workout',
-      workout: '/workout',
-      progress: '/progress',
-      profile: '/profile',
-      achievements: '/achievements',
-      water: '/water',
-      nutrition: '/nutrition',
-      calendar: '/calendar',
-      measurements: '/measurements',
-      notifications: '/notifications',
-      health: '/health',
-    };
-    return paths[screen];
+  // Map screens to paths for navigation
+  const screenToPath: Record<AppScreen, string> = {
+    onboarding: '/onboarding',
+    dashboard: '/dashboard',
+    equipment: '/equipment',
+    'add-equipment': '/equipment/add',
+    plan: '/plan',
+    'edit-plan': '/plan/edit',
+    'select-workout': '/select-workout',
+    workout: '/workout',
+    progress: '/progress',
+    profile: '/profile',
+    achievements: '/achievements',
+    water: '/water',
+    nutrition: '/nutrition',
+    calendar: '/calendar',
+    measurements: '/measurements',
+    notifications: '/notifications',
+    health: '/health',
+    diary: '/diary',
+    cycle: '/cycle',
   };
 
   const handleEditPlan = (planId: string) => {
@@ -148,6 +153,8 @@ function AppContent() {
     setCurrentScreen('workout');
   };
 
+  const showChatBubble = !['onboarding', 'workout'].includes(currentScreen) && user?.onboardingComplete;
+
   return (
     <div className="min-h-screen bg-background">
       <AnimatePresence mode="wait">
@@ -166,6 +173,7 @@ function AppContent() {
             onViewMeasurements={() => setCurrentScreen('measurements')}
             onViewNotifications={() => setCurrentScreen('notifications')}
             onViewHealth={() => setCurrentScreen('health')}
+            onViewCycle={() => setCurrentScreen('cycle')}
           />
         )}
 
@@ -264,14 +272,25 @@ function AppContent() {
         {currentScreen === 'health' && (
           <HealthDataPage key="health" />
         )}
+
+        {currentScreen === 'diary' && (
+          <TrainingDiary key="diary" onBack={() => setCurrentScreen('dashboard')} />
+        )}
+
+        {currentScreen === 'cycle' && (
+          <CyclePage key="cycle" onBack={() => setCurrentScreen('dashboard')} />
+        )}
       </AnimatePresence>
 
       {showNav && (
         <MobileNav
-          currentPath={getPathFromScreen(currentScreen)}
+          currentPath={screenToPath[currentScreen]}
           onNavigate={handleNavigate}
         />
       )}
+
+      {/* AI Chat Bubble - always visible after onboarding */}
+      {showChatBubble && <AIChatBubble />}
     </div>
   );
 }
