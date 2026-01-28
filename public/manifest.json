@@ -1,0 +1,27 @@
+{
+  "name": "FitAI - Dein Fitness Coach",
+  "short_name": "FitAI",
+  "description": "Dein intelligenter Fitness Coach mit personalisierten Workout-Plänen",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/app-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle"],
+  "lang": "de",
+  "dir": "ltr"
+}

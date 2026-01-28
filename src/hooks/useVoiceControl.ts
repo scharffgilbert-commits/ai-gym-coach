@@ -22,10 +22,44 @@ export function useVoiceControl(options: UseVoiceControlOptions = {}) {
   const recognitionRef = useRef<SpeechRecognitionType | null>(null);
   const commandsRef = useRef<VoiceCommand[]>([]);
 
+  // Check iOS Safari support - limited Web Speech API
+  const checkiOSSupport = useCallback(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
+    if (isIOS && isSafari) {
+      console.warn('Voice control has limited support on iOS Safari');
+      return false;
+    }
+    return isSupported;
+  }, [isSupported]);
+
+  // Process command - defined before useEffect that uses it
+  const processCommand = useCallback((text: string) => {
+    for (const command of commandsRef.current) {
+      for (const keyword of command.keywords) {
+        if (text.includes(keyword.toLowerCase())) {
+          onCommand?.(command.action);
+          return;
+        }
+      }
+    }
+  }, [onCommand]);
+
   // Check browser support
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    setIsSupported(!!SpeechRecognition && 'speechSynthesis' in window);
+    const supported = !!SpeechRecognition && 'speechSynthesis' in window;
+    setIsSupported(supported);
+    
+    // Log iOS Safari warning if applicable
+    if (supported) {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      if (isIOS && isSafari) {
+        console.warn('Voice control has limited support on iOS Safari');
+      }
+    }
   }, []);
 
   // Initialize speech recognition
@@ -83,18 +117,7 @@ export function useVoiceControl(options: UseVoiceControlOptions = {}) {
     return () => {
       recognition.stop();
     };
-  }, [isSupported, language, isListening]);
-
-  const processCommand = useCallback((text: string) => {
-    for (const command of commandsRef.current) {
-      for (const keyword of command.keywords) {
-        if (text.includes(keyword.toLowerCase())) {
-          onCommand?.(command.action);
-          return;
-        }
-      }
-    }
-  }, [onCommand]);
+  }, [isSupported, language, isListening, processCommand]);
 
   const startListening = useCallback(async () => {
     if (!isSupported) {
@@ -171,6 +194,7 @@ export function useVoiceControl(options: UseVoiceControlOptions = {}) {
     speak,
     stopSpeaking,
     registerCommands,
+    checkiOSSupport,
   };
 }
 

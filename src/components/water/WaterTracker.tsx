@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Droplet, Plus, Minus, Target, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,13 +32,7 @@ export function WaterTracker({ compact = false }: WaterTrackerProps) {
 
   const quickAmounts = [150, 250, 500, 750];
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchTodayEntries();
-    }
-  }, [user?.id]);
-
-  const fetchTodayEntries = async () => {
+  const fetchTodayEntries = useCallback(async () => {
     if (!user?.id) return;
     
     const today = new Date();
@@ -57,7 +51,13 @@ export function WaterTracker({ compact = false }: WaterTrackerProps) {
       setEntries(data || []);
     }
     setIsLoading(false);
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchTodayEntries();
+    }
+  }, [user?.id, fetchTodayEntries]);
 
   const addWater = async (amount: number) => {
     if (!user?.id) return;

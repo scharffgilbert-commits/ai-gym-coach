@@ -113,7 +113,14 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
   const [pendingEndWorkout, setPendingEndWorkout] = useState(false);
   const [pendingVoiceAction, setPendingVoiceAction] = useState<string | null>(null);
 
-  // Voice control handler - sets pending action
+  // Derive current exercise - safe to use undefined initially
+  const currentExercise = exercises[currentExerciseIndex];
+  const totalExercises = exercises.length;
+  const overallProgress = currentExercise && totalExercises > 0
+    ? ((currentExerciseIndex * 100) + ((currentSetNumber - 1) / currentExercise.sets * 100)) / totalExercises
+    : 0;
+
+  // Voice control handler - MUST be defined before useVoiceControl
   const handleVoiceCommand = useCallback((action: string) => {
     switch (action) {
       case 'COMPLETE_SET':
@@ -151,7 +158,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
     }
   }, [exercises.length, pendingEndWorkout]);
 
-  // Initialize voice control
+  // Initialize voice control - MUST be called unconditionally
   const {
     isListening,
     isSpeaking,
@@ -166,85 +173,7 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
     onCommand: handleVoiceCommand,
   });
 
-  // Register voice commands based on language
-  useEffect(() => {
-    const commands = WORKOUT_COMMANDS[language] || WORKOUT_COMMANDS.en;
-    registerCommands(commands);
-  }, [language, registerCommands]);
-
-  // Toggle voice mode
-  const toggleVoiceMode = useCallback(async () => {
-    if (voiceModeActive) {
-      stopListening();
-      setVoiceModeActive(false);
-    } else {
-      const started = await startListening();
-      if (started) {
-        setVoiceModeActive(true);
-        // Announce current exercise
-        const currentEx = exercises[currentExerciseIndex];
-        if (currentEx) {
-          const announcement = language === 'de'
-            ? `${currentEx.machineName}. Satz ${currentSetNumber} von ${currentEx.sets}. ${currentEx.targetReps} Wiederholungen mit ${actualWeight} Kilo.`
-            : `${currentEx.machineName}. Set ${currentSetNumber} of ${currentEx.sets}. ${currentEx.targetReps} reps at ${actualWeight} kilos.`;
-          speak(announcement);
-        }
-      }
-    }
-  }, [voiceModeActive, stopListening, startListening, exercises, currentExerciseIndex, currentSetNumber, actualWeight, language, speak]);
-
-  const currentExercise = exercises[currentExerciseIndex];
-  const totalExercises = exercises.length;
-  const overallProgress = currentExercise && totalExercises > 0
-    ? ((currentExerciseIndex * 100) + ((currentSetNumber - 1) / currentExercise.sets * 100)) / totalExercises
-    : 0;
-
-  // All hooks MUST be called before any conditional returns
-  useEffect(() => {
-    if (currentExercise) {
-      setActualReps(currentExercise.targetReps);
-      setActualWeight(currentExercise.targetWeight);
-    }
-  }, [currentExercise]);
-
-  // Rest timer countdown - MUST be before conditional returns
-  useEffect(() => {
-    if (phase !== 'rest' || isTimerPaused || restTimeRemaining <= 0 || !currentExercise) return;
-
-    const timer = setInterval(() => {
-      setRestTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          // Handle rest complete inline to avoid stale closure
-          if (currentSetNumber >= (currentExercise?.sets || 0)) {
-            setCurrentExerciseIndex(idx => idx + 1);
-            setCurrentSetNumber(1);
-          }
-          setPhase('exercise');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [phase, isTimerPaused, restTimeRemaining, currentExercise, currentSetNumber]);
-
-  // Show loading or empty state if no exercises
-  if (!currentExercise || exercises.length === 0) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Dumbbell className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">{t('workout_no_exercises')}</p>
-          <Button variant="outline" className="mt-4" onClick={onExit}>
-            {t('workout_go_back')}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
+  // handleSetComplete - MUST be defined with useCallback before useEffect that uses it
   const handleSetComplete = useCallback(() => {
     if (!currentExercise) return;
     
@@ -292,6 +221,64 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
     }
   }, [currentExercise, currentSetNumber, actualReps, actualWeight, currentExerciseIndex, exercises.length, voiceModeActive, language, speak]);
 
+  // Register voice commands based on language
+  useEffect(() => {
+    const commands = WORKOUT_COMMANDS[language] || WORKOUT_COMMANDS.en;
+    registerCommands(commands);
+  }, [language, registerCommands]);
+
+  // Toggle voice mode
+  const toggleVoiceMode = useCallback(async () => {
+    if (voiceModeActive) {
+      stopListening();
+      setVoiceModeActive(false);
+    } else {
+      const started = await startListening();
+      if (started) {
+        setVoiceModeActive(true);
+        // Announce current exercise
+        const currentEx = exercises[currentExerciseIndex];
+        if (currentEx) {
+          const announcement = language === 'de'
+            ? `${currentEx.machineName}. Satz ${currentSetNumber} von ${currentEx.sets}. ${currentEx.targetReps} Wiederholungen mit ${actualWeight} Kilo.`
+            : `${currentEx.machineName}. Set ${currentSetNumber} of ${currentEx.sets}. ${currentEx.targetReps} reps at ${actualWeight} kilos.`;
+          speak(announcement);
+        }
+      }
+    }
+  }, [voiceModeActive, stopListening, startListening, exercises, currentExerciseIndex, currentSetNumber, actualWeight, language, speak]);
+
+  // Set initial reps/weight when exercise changes
+  useEffect(() => {
+    if (currentExercise) {
+      setActualReps(currentExercise.targetReps);
+      setActualWeight(currentExercise.targetWeight);
+    }
+  }, [currentExercise]);
+
+  // Rest timer countdown
+  useEffect(() => {
+    if (phase !== 'rest' || isTimerPaused || restTimeRemaining <= 0 || !currentExercise) return;
+
+    const timer = setInterval(() => {
+      setRestTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // Handle rest complete inline to avoid stale closure
+          if (currentSetNumber >= (currentExercise?.sets || 0)) {
+            setCurrentExerciseIndex(idx => idx + 1);
+            setCurrentSetNumber(1);
+          }
+          setPhase('exercise');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [phase, isTimerPaused, restTimeRemaining, currentExercise, currentSetNumber]);
+
   // Handle pending voice actions
   useEffect(() => {
     if (pendingVoiceAction === 'COMPLETE_SET' && phase === 'exercise') {
@@ -299,6 +286,21 @@ export function WorkoutSession({ onComplete, onExit, initialExercises }: Workout
       setPendingVoiceAction(null);
     }
   }, [pendingVoiceAction, phase, handleSetComplete]);
+
+  // NOW we can have conditional returns - all hooks are called above
+  if (!currentExercise || exercises.length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Dumbbell className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">{t('workout_no_exercises')}</p>
+          <Button variant="outline" className="mt-4" onClick={onExit}>
+            {t('workout_go_back')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleRestComplete = () => {
     if (currentSetNumber >= currentExercise.sets) {
