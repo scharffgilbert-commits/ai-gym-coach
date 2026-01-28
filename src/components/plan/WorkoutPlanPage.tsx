@@ -71,7 +71,7 @@ export function WorkoutPlanPage({ onStartWorkout, onEditPlan }: WorkoutPlanPageP
   const hasAnyExercises = Object.values(weeklyPlan).some(day => day.length > 0);
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader
         title="Training Plan"
         subtitle="Your AI-generated weekly schedule"

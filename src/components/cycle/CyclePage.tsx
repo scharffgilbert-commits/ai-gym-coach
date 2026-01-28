@@ -45,7 +45,7 @@ export function CyclePage({ onBack }: CyclePageProps) {
   };
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader
         title={t('cycle_title')}
         subtitle={t('cycle_subtitle')}

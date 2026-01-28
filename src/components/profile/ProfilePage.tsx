@@ -63,7 +63,7 @@ export function ProfilePage({ onLogout, onResetProfile }: ProfilePageProps) {
     : 0;
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader title="Profile" />
 
       <div className="px-4 space-y-6">
