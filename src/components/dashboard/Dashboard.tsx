@@ -34,7 +34,7 @@ export function Dashboard({ onStartWorkout, onAddEquipment, onViewAchievements, 
   const hasEquipment = gyms.length > 0 && gyms[0].machines.length > 0;
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader
         title={`Hey, ${user?.name?.split(' ')[0] || 'Champion'}!`}
         subtitle={t('dashboard_ready')}
