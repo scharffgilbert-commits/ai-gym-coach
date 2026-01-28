@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,11 +27,7 @@ export function AchievementsList() {
   const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAchievements();
-  }, [user?.id]);
-
-  const fetchAchievements = async () => {
+  const fetchAchievements = useCallback(async () => {
     // Fetch all achievements
     const { data: allAchievements, error: achievementsError } = await supabase
       .from('achievements')
@@ -58,7 +54,11 @@ export function AchievementsList() {
     }
 
     setIsLoading(false);
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchAchievements();
+  }, [fetchAchievements]);
 
   const categories = [...new Set(achievements.map(a => a.category))];
   
