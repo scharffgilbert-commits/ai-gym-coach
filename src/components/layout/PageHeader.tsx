@@ -24,9 +24,9 @@ export function PageHeader({
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn('sticky top-0 z-40 bg-background/95 backdrop-blur-xl', className)}
+      className={cn('sticky top-0 z-40 bg-background/95 backdrop-blur-xl safe-area-top', className)}
     >
-      <div className="flex items-center justify-between px-4 py-4 safe-area-top">
+      <div className="flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-3">
           {showBack && (
             <Button
