@@ -271,9 +271,9 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12 relative safe-area-y">
       {/* Language Selector */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 safe-area-top">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2">

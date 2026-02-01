@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Plus, Trash2, GripVertical, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -41,11 +41,7 @@ export function PlanEditor({ planId, onBack, onSave }: PlanEditorProps) {
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  useEffect(() => {
-    loadPlan();
-  }, [planId]);
-
-  const loadPlan = async () => {
+  const loadPlan = useCallback(async () => {
     try {
       const { data: plan, error: planError } = await supabase
         .from('workout_plans')
@@ -89,7 +85,11 @@ export function PlanEditor({ planId, onBack, onSave }: PlanEditorProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [planId, days]);
+
+  useEffect(() => {
+    loadPlan();
+  }, [loadPlan]);
 
   const updateExercise = (dayIndex: number, exerciseId: string, field: keyof Exercise, value: string | number) => {
     setWeeklyPlan(prev => prev.map(day => {
@@ -215,7 +215,7 @@ export function PlanEditor({ planId, onBack, onSave }: PlanEditorProps) {
   const currentDay = weeklyPlan[selectedDay];
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader
         title="Edit Plan"
         subtitle="Customize your workout schedule"

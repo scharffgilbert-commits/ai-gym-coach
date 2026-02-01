@@ -12,7 +12,7 @@ export function CalendarPage({ onBack }: CalendarPageProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen pb-24 bg-background"
+      className="min-h-screen pb-32 safe-area-bottom bg-background"
     >
       <PageHeader
         title="Workout Kalender"

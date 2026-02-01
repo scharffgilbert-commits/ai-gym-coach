@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { format, subDays } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
@@ -73,13 +73,7 @@ export function TrainingDiary({ onBack }: TrainingDiaryProps) {
     { id: 'neutral', label: t('diary_moodNeutral'), icon: Meh },
   ];
 
-  useEffect(() => {
-    if (user) {
-      loadEntries();
-    }
-  }, [user, dateRange]);
-
-  const loadEntries = async () => {
+  const loadEntries = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
@@ -104,7 +98,13 @@ export function TrainingDiary({ onBack }: TrainingDiaryProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, dateRange, toast, t]);
+
+  useEffect(() => {
+    if (user) {
+      loadEntries();
+    }
+  }, [user, dateRange, loadEntries]);
 
   const handleSaveEntry = async (entry: Partial<DiaryEntry>) => {
     if (!user) return;

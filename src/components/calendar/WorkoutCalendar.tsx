@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, subMonths, addMonths, startOfWeek, endOfWeek, parseISO, isSameMonth } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -28,60 +28,7 @@ export function WorkoutCalendar() {
   const [streakInfo, setStreakInfo] = useState<StreakInfo>({ current: 0, longest: 0, thisMonth: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchWorkoutData();
-    }
-  }, [user, currentMonth]);
-
-  const fetchWorkoutData = async () => {
-    if (!user) return;
-    
-    setIsLoading(true);
-    try {
-      // Fetch all workout sessions for the user
-      const { data: sessions, error } = await supabase
-        .from('workout_sessions')
-        .select('id, start_time, total_duration, status')
-        .eq('user_id', user.id)
-        .eq('status', 'completed')
-        .order('start_time', { ascending: false });
-
-      if (error) throw error;
-
-      // Get exercises count for each session
-      const sessionsWithExercises = await Promise.all(
-        (sessions || []).map(async (session) => {
-          const { count } = await supabase
-            .from('completed_exercises')
-            .select('*', { count: 'exact', head: true })
-            .eq('session_id', session.id);
-          
-          return {
-            ...session,
-            exerciseCount: count || 0,
-          };
-        })
-      );
-
-      // Map sessions to workout days
-      const days: WorkoutDay[] = sessionsWithExercises.map((session) => ({
-        date: parseISO(session.start_time),
-        hasWorkout: true,
-        duration: session.total_duration || undefined,
-        exerciseCount: session.exerciseCount,
-      }));
-
-      setWorkoutDays(days);
-      calculateStreaks(sessions?.map(s => parseISO(s.start_time)) || []);
-    } catch (error) {
-      console.error('Error fetching workout data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const calculateStreaks = (dates: Date[]) => {
+  const calculateStreaks = useCallback((dates: Date[]) => {
     if (dates.length === 0) {
       setStreakInfo({ current: 0, longest: 0, thisMonth: 0 });
       return;
@@ -149,7 +96,60 @@ export function WorkoutCalendar() {
     const thisMonth = uniqueDates.filter(d => isSameMonth(d, new Date())).length;
 
     setStreakInfo({ current: currentStreak, longest: longestStreak, thisMonth });
-  };
+  }, []);
+
+  const fetchWorkoutData = useCallback(async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      // Fetch all workout sessions for the user
+      const { data: sessions, error } = await supabase
+        .from('workout_sessions')
+        .select('id, start_time, total_duration, status')
+        .eq('user_id', user.id)
+        .eq('status', 'completed')
+        .order('start_time', { ascending: false });
+
+      if (error) throw error;
+
+      // Get exercises count for each session
+      const sessionsWithExercises = await Promise.all(
+        (sessions || []).map(async (session) => {
+          const { count } = await supabase
+            .from('completed_exercises')
+            .select('*', { count: 'exact', head: true })
+            .eq('session_id', session.id);
+          
+          return {
+            ...session,
+            exerciseCount: count || 0,
+          };
+        })
+      );
+
+      // Map sessions to workout days
+      const days: WorkoutDay[] = sessionsWithExercises.map((session) => ({
+        date: parseISO(session.start_time),
+        hasWorkout: true,
+        duration: session.total_duration || undefined,
+        exerciseCount: session.exerciseCount,
+      }));
+
+      setWorkoutDays(days);
+      calculateStreaks(sessions?.map(s => parseISO(s.start_time)) || []);
+    } catch (error) {
+      console.error('Error fetching workout data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, calculateStreaks]);
+
+  useEffect(() => {
+    if (user) {
+      fetchWorkoutData();
+    }
+  }, [user, currentMonth, fetchWorkoutData]);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);

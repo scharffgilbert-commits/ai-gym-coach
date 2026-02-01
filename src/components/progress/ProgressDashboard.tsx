@@ -12,7 +12,7 @@ export function ProgressDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen pb-24 bg-background flex items-center justify-center">
+      <div className="min-h-screen pb-32 safe-area-bottom bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -31,7 +31,7 @@ export function ProgressDashboard() {
       ];
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader
         title="Progress"
         subtitle="Track your fitness journey"

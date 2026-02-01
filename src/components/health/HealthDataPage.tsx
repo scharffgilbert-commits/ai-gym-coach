@@ -126,7 +126,7 @@ export function HealthDataPage() {
   };
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader
         title="Health Daten"
         subtitle="Wearable & Fitness Tracking"

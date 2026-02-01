@@ -43,7 +43,7 @@ export function EquipmentList({ onBack, onAddEquipment }: EquipmentListProps) {
   };
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
+    <div className="min-h-screen pb-32 safe-area-bottom bg-background">
       <PageHeader
         title="My Equipment"
         subtitle={`${machines.length} machines in your gym`}
